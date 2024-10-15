@@ -23,6 +23,12 @@ def allowed_file(filename):
 
 ##################### Routing #####################
 
+
+
+
+
+
+##################### Error Handler #####################
 # Error handler untuk 404 - Page Not Found
 @app.errorhandler(404)
 def page_not_found(e):
