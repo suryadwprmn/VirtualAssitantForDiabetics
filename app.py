@@ -19,10 +19,6 @@ def allowed_file(filename):
 
 ##################### Routing #####################
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -32,12 +28,16 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.route('/')
+def index():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('index.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'user_id' in session:
-        flash('You are already logged in.', 'info')
-        return redirect(url_for('index'))
-
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -46,14 +46,28 @@ def login():
             session['user_id'] = user.id
             session['role'] = user.role
             flash('Login successful. Welcome back!', 'success')
-            return redirect(url_for('index'))
+            if user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('index'))
         else:
             flash('Invalid email or password. Please try again.', 'danger')
     return render_template('auth/login.html')
 
 @app.route('/admin')
+@login_required
 def admin_dashboard():
-    return render_template('admin/dashboard.html') 
+    if session.get('role') != 'admin':
+        flash('You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+    return render_template('admin/dashboard.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('role', None)
+    flash('You have been logged out successfully.', 'success')
+    return redirect(url_for('index'))
 ##################### Routing #####################
 
 
