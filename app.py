@@ -2,7 +2,9 @@ from flask import Flask, render_template, url_for,request,redirect,flash,abort,s
 from config import Config,db
 from werkzeug.utils import secure_filename
 import os
-import bcrypt
+from werkzeug.security import check_password_hash
+from models import User
+from functools import wraps
 
 ### Menjalankan Flask
 app = Flask(__name__)
@@ -17,10 +19,37 @@ def allowed_file(filename):
 
 ##################### Routing #####################
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if 'user_id' in session:
+        flash('You are already logged in.', 'info')
+        return redirect(url_for('index'))
 
-
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            session['role'] = user.role
+            flash('Login successful. Welcome back!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid email or password. Please try again.', 'danger')
+    return render_template('auth/login.html')
 ##################### Routing #####################
 
 
