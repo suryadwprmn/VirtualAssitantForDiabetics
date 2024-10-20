@@ -50,6 +50,10 @@ def login():
         else:
             flash('Invalid email or password. Please try again.', 'danger')
     return render_template('auth/login.html')
+
+@app.route('/admin')
+def admin_dashboard():
+    return render_template('admin/dashboard.html') 
 ##################### Routing #####################
 
 
