@@ -66,8 +66,17 @@ def admin_dashboard():
 def logout():
     session.pop('user_id', None)
     session.pop('role', None)
+    session.clear()
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('index'))
+
+
+### Route Admin ###
+@app.route('/admin/article')
+@login_required
+def articles():
+    return render_template('admin/article.html')
+#### Route Admin ###
 ##################### Routing #####################
 
 
