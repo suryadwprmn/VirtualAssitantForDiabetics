@@ -3,7 +3,7 @@ from config import Config,db
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import check_password_hash
-from models import User
+from models import User, Article
 from functools import wraps
 
 ### Menjalankan Flask
@@ -17,6 +17,8 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 
+
+
 ##################### Routing #####################
 
 def login_required(f):
@@ -25,6 +27,11 @@ def login_required(f):
         if 'user_id' not in session:
             flash('Please log in to access this page.', 'warning')
             return redirect(url_for('login', next=request.url))
+        
+        if session.get('role') != 'admin':
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('index'))
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -72,10 +79,77 @@ def logout():
 
 
 ### Route Admin ###
-@app.route('/admin/article')
+@app.route('/admin/articles')
 @login_required
 def articles():
-    return render_template('admin/article.html')
+    all_articles = Article.query.all()
+    return render_template('admin/article.html', articles=all_articles)
+
+
+@app.route('/admin/article/create', methods=['GET', 'POST'])
+@login_required
+def create_article():
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        image = request.files['image']
+        
+        if not title or not content:
+            flash('Title and content are required.', 'error')
+            return redirect(url_for('create_article'))
+        
+        image_filename = None
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image_filename = f"{session['user_id']}_{filename}"
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+        
+        new_article = Article(
+            user_id=session['user_id'],
+            title=title,
+            content=content,
+            images=image_filename
+        )
+        
+        db.session.add(new_article)
+        db.session.commit()
+        
+        flash('Article created successfully!', 'success')
+        return redirect(url_for('articles', article_id=new_article.id))
+    
+    return render_template('admin/tambah_artikel.html')
+
+@app.route('/admin/article/edit/<int:article_id>', methods=['GET', 'POST'])
+@login_required
+def edit_article(article_id):
+    article = Article.query.get_or_404(article_id)
+
+    if request.method == 'POST':
+        article.title = request.form['title']
+        article.content = request.form['content']
+
+        image = request.files['image']
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image_filename = f"{session['user_id']}_{filename}"
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            article.images = image_filename
+
+        db.session.commit()
+        flash('Article updated successfully!', 'success')
+        return redirect(url_for('articles'))
+
+    return render_template('admin/edit_article.html', article=article)
+
+@app.route('/admin/article/delete/<int:article_id>', methods=['POST'])
+@login_required
+def delete_article(article_id):
+    article = Article.query.get_or_404(article_id)
+    db.session.delete(article)
+    db.session.commit()
+    flash('Article deleted successfully!', 'success')
+    return redirect(url_for('articles'))
+
 #### Route Admin ###
 ##################### Routing #####################
 
@@ -88,7 +162,9 @@ def articles():
 # Error handler untuk 404 - Page Not Found
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('errors/404.html'), 404
+    flash('The page you are looking for does not exist. You are being redirected to the home page.', 'warning')
+    return redirect(url_for('index')) 
+
 
 # Error handler untuk 500 - Internal Server Error
 @app.errorhandler(500)
