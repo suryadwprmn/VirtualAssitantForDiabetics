@@ -19,7 +19,7 @@ class User(db.Model):
     def __init__(self, name, email, password, address=None, age=None, gender='male', category_diabetes='non-diabetes', role='User'):
         self.name = name
         self.email = email
-        self.password = password  # Simpan hash password di sini
+        self.password = password  
         self.address = address
         self.age = age
         self.gender = gender
