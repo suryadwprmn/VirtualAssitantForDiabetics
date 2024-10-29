@@ -2,14 +2,18 @@
     {% if messages %}
         {% for category, message in messages %}
             {% if category == 'success' %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>{{ message }}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded" role="alert">
+                    <strong class="font-bold">{{ message }}</strong>
+                    <button type="button" class="float-right text-green-500" onclick="this.parentElement.remove();">
+                        ✕
+                    </button>
                 </div>
             {% elif category == 'danger' %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>{{ message }}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
+                    <strong class="font-bold">{{ message }}</strong>
+                    <button type="button" class="float-right text-red-500" onclick="this.parentElement.remove();">
+                        ✕
+                    </button>
                 </div>
             {% endif %}
         {% endfor %}

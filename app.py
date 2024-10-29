@@ -43,6 +43,32 @@ def index():
             return redirect(url_for('admin_dashboard'))
     return render_template('index.html')
 
+@app.route('/artikel')
+def artikel():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('article.html')
+
+@app.route('/cek_rs')
+def cek_rs():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('rumah_sakit.html')
+
+@app.route('/chatbot')
+def chatbot():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('rumah_sakit.html')
+
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
