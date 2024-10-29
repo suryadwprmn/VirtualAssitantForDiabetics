@@ -151,7 +151,10 @@ def delete_article(article_id):
     return redirect(url_for('articles'))
 
 #### Route Admin ###
+
 ##################### Routing #####################
+
+
 
 
 
