@@ -65,7 +65,7 @@ def chatbot():
         user = User.query.get(session['user_id'])
         if user.role == 'admin':
             return redirect(url_for('admin_dashboard'))
-    return render_template('rumah_sakit.html')
+    return render_template('chatbot.html')
 
 
 
