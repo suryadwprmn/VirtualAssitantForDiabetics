@@ -31,11 +31,12 @@ def Home():
 
 @app.route('/artikel')
 def artikel():
+    all_articles = Article.query.all()
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
         if user.role == 'admin':
             return redirect(url_for('admin_dashboard'))
-    return render_template('article.html')
+    return render_template('article.html', articles=all_articles)
 
 @app.route('/cek_rs')
 def cek_rs():
