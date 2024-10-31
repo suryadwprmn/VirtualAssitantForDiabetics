@@ -1,1 +1,106 @@
-<h1>Chat bot</h1>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divistant - Sahabat Virtual untuk Hidup Lebih Sehat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,300;1,500&display=swap" rel="stylesheet">   
+     <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+</head>
+<body class="bg-[#1B2341]  text-white">
+
+
+     <!-- Header -->
+    <header class="text-center py-8">
+        <img src="{{url_for('static', filename='/img/Logo1.png')}}" alt="Logo Divistant" class="mx-auto" style="width: 400px;">
+        <h1 class="text-lg font-bold">"Divistant, Sahabat Virtual untuk Hidup Lebih Sehat Bersama Diabetes."</h1>
+    </header>
+
+  <!-- Section 1: Halo DivisTER -->
+    <section class="text-center py-10">
+        <h2 class="text-9xl font-bold pb-20">HALO DIVIS<span class="text-[#232947] border rounded-full p-2 bg-white">TER!</span></h2>
+        <p class="mt-4 mx-auto max-w-2xl text-lg font-sans   ">
+            Selamat datang di Divistant! Kami adalah asisten virtual yang siap membantu Anda dalam menjaga kesehatan diabetes. Dengan berbagai informasi terpercaya dan fitur interaktif, Divistant hadir untuk mendukung perjalanan Anda menuju hidup yang lebih sehat dan terkontrol.
+        </p>
+    </section>
+  
+    
+     <!-- Section 2: Artikel -->
+     
+     <div class="w-full pt-5">
+         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="w-full">
+             <svg class="w-full " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#ffffff" fill-opacity="1" d="M0,160L60,138.7C120,117,240,75,360,74.7C480,75,600,117,720,149.3C840,181,960,203,1080,192C1200,181,1320,139,1380,117.3L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path></svg>
+        </svg>
+    
+        <section class="bg-white text-[#1B2341] py-40 px-6">
+            <div class="max-w-4xl mx-auto flex items-center">
+                <div class="flex space-x-2 mr-6">
+                    <div>
+                    <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant" class="mx-auto border border-blue-950 rounded-lg  " style="width: 700px;">
+                    </div>
+                    <div>
+                    <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant" class="mx-auto border border-blue-950 rounded-lg  " style="width: 1500px; height: 500px;">
+                    </div>
+                    <div>
+                     <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant" class="mx-auto border border-blue-950 rounded-lg align-content-center  " style="width: 700px;">
+                    </div>
+                    
+                </div>
+                <div>
+                    <p class="mt-4">
+                        Temukan berbagai artikel dan berita terbaru seputar kesehatan diabetes di sini. Kami menyediakan konten yang informatif dan mudah dipahami agar Anda selalu ter-update dengan informasi dan panduan kesehatan terpercaya.
+                    </p>
+                    <button class="mt-6 px-4 py-2 bg-[#1B2341] text-white rounded-full shadow-md hover:bg-[#3c4a70]">
+                        check it out! ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+        </section>
+       
+     <!-- Section 3: Layanan Kesehatan -->
+    <section class="bg-[#1B2341] py-12 px-6">
+        <div class="max-w-3xl mx-auto text-center">
+            <p>
+                Dapatkan rekomendasi rumah sakit terdekat untuk layanan kesehatan diabetes Anda. Kami bekerja sama dengan fasilitas kesehatan di sekitar Anda untuk membantu Anda menemukan layanan perawatan yang mudah diakses dan sesuai kebutuhan.
+            </p>
+            <div class="flex justify-center mt-8 space-x-4">
+                <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant"  style="width: 700px;">
+                <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant"  style="width: 700px;">
+                <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant"  style="width: 700px;">
+                <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Logo Divistant"  style="width: 700px;">
+
+                <!-- <div class="bg-white h-36 w-80 rounded"></div>
+                <div class="bg-white h-36 w-80 rounded"></div>
+                <div class="bg-white h-36 w-80 rounded"></div>
+                <div class="bg-white h-36 w-80 rounded"></div>
+                <div class="bg-white h-36 w-80 rounded"></div> -->
+            </div>
+            <button class="mt-6 px-4 py-2 bg-white text-[#1B2341] rounded-full shadow-md hover:bg-gray-200">
+                check it out! ➔
+            </button>
+        </div>
+    </section>
+
+    <!-- Section 4: Chatbot -->
+    <section class="bg-[#ffffff] py-12 text-center">
+        <p class="text-[#1B2341]">Butuh jawaban cepat atau dukungan langsung? Gunakan fitur chatbot kami, Divister!</p>
+        <button class="mt-6 px-4 py-2 bg-white text-[#1B2341] rounded-full shadow-md hover:bg-gray-200">
+            COBA CHATBOT
+        </button>
+    </section>
+    
+        <!-- Footer -->
+        
+        <footer class="bg-[#1B2341] text-center py-6">
+            <img src="/static/img/logo.png" alt="Logo Divistant" class="mx-auto mb-2" style="width: 40px;">
+        <p class="text-sm text-gray-400">© 2024 Divistant owner</p>
+        </footer>
+    </body>
+    </html>
+    <!-- Footer -->
+</body>
+</html>
+

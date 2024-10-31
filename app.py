@@ -17,7 +17,24 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 
+##################### Landing Page Routing #####################
+@app.route("/")
+def first():
+    return render_template("index.html")
 
+@app.route("/home")
+def Home():
+	return render_template("Home.html")
+
+@app.route("/article")
+def Artikel():
+	return render_template("article.html")
+
+@app.route("/hospital")
+def Hospital():
+	return render_template("Hospital.html")
+
+##################### End Landing Page Routing #####################
 
 ##################### Routing #####################
 

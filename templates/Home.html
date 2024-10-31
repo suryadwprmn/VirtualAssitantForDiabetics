@@ -1,12 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parallax Effect with Tailwind CSS</title>
+  <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
 </head>
-<body>
-    <h1>cuy</h1>
+<body class="bg-gray-100">
+
+  <!-- Section Parallax -->
+  <div class="relative h-screen bg-fixed bg-cover bg-center" style="background-image: url('https://example.com/your-image.jpg');">
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative z-10 flex items-center justify-center h-full">
+      <h1 class="text-5xl font-bold text-white">Parallax Effect</h1>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="p-8 text-center bg-white mb-">
+    <h2 class="text-3xl font-bold">Content After Parallax</h2>
+    <p class="mt-4 text-gray-600 ">
+      This is a regular content section following the parallax effect.
+    </p>
+  </div>
+
 </body>
 </html>
