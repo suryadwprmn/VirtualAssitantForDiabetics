@@ -67,8 +67,6 @@ def chatbot():
             return redirect(url_for('admin_dashboard'))
     return render_template('chatbot.html')
 
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
