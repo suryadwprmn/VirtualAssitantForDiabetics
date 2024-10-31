@@ -16,23 +16,42 @@ db.init_app(app)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
-
 ##################### Landing Page Routing #####################
-@app.route("/")
-def first():
-    return render_template("index.html")
+@app.route('/')
+def index():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('index.html')
 
 @app.route("/home")
 def Home():
 	return render_template("Home.html")
 
-@app.route("/article")
-def Artikel():
-	return render_template("article.html")
+@app.route('/artikel')
+def artikel():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('article.html')
 
-@app.route("/hospital")
-def Hospital():
-	return render_template("Hospital.html")
+@app.route('/cek_rs')
+def cek_rs():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('Hospital.html')
+
+@app.route('/chatbot')
+def chatbot():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+    return render_template('chatbot.html')
 
 ##################### End Landing Page Routing #####################
 
@@ -51,38 +70,6 @@ def login_required(f):
 
         return f(*args, **kwargs)
     return decorated_function
-
-@app.route('/')
-def index():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        if user.role == 'admin':
-            return redirect(url_for('admin_dashboard'))
-    return render_template('index.html')
-
-@app.route('/artikel')
-def artikel():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        if user.role == 'admin':
-            return redirect(url_for('admin_dashboard'))
-    return render_template('article.html')
-
-@app.route('/cek_rs')
-def cek_rs():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        if user.role == 'admin':
-            return redirect(url_for('admin_dashboard'))
-    return render_template('rumah_sakit.html')
-
-@app.route('/chatbot')
-def chatbot():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        if user.role == 'admin':
-            return redirect(url_for('admin_dashboard'))
-    return render_template('chatbot.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -194,13 +181,6 @@ def delete_article(article_id):
 #### Route Admin ###
 
 ##################### Routing #####################
-
-
-
-
-
-
-
 
 ##################### Error Handler #####################
 # Error handler untuk 404 - Page Not Found
