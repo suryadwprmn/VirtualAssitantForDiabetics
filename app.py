@@ -56,7 +56,7 @@ def chatbot():
 
 
 @app.route("/article")
-def Article():
+def artikelSectiom():
 	return render_template("article_section.html")
 
 ##################### End Landing Page Routing #####################
