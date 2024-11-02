@@ -3,7 +3,7 @@ from config import Config,db
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import check_password_hash
-from models import User, Article
+from models import User, Article, RumahSakit
 from functools import wraps
 from werkzeug.security import generate_password_hash
 
@@ -126,6 +126,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -232,6 +233,59 @@ def delete_article(article_id):
     db.session.commit()
     flash('Article deleted successfully!', 'success')
     return redirect(url_for('articles'))
+
+@app.route('/admin/rumah_sakit')
+@login_required
+def rumah_sakit():
+    all_rumah_sakit = RumahSakit.query.all()
+    return render_template('admin/rumah_sakit.html', rumah_sakit_data=all_rumah_sakit)
+
+@app.route('/admin/rumah_sakit/create', methods=['GET', 'POST'])
+@login_required
+def create_rumah_sakit():
+    if request.method == 'POST':
+        maps = request.form.get('maps')
+        rumah_sakit = request.form.get('rumah_sakit')
+        rating = request.form.get('rating')
+        tipe = request.form.get('tipe')
+        jalan = request.form.get('jalan')
+        gambar = request.form.get('gambar')  # URL/path for the image
+
+        new_rumah_sakit = RumahSakit(maps=maps, rumah_sakit=rumah_sakit, rating=rating, tipe=tipe, jalan=jalan, gambar=gambar)
+        db.session.add(new_rumah_sakit)
+        db.session.commit()
+        flash("Rumah sakit berhasil ditambahkan!", "success")
+        return redirect(url_for('rumah_sakit'))
+    
+    return render_template('admin/tambah_rumah_sakit.html')
+
+@app.route('/admin/rumah_sakit/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_rumah_sakit(id):
+    rumah_sakit = RumahSakit.query.get_or_404(id)
+
+    if request.method == 'POST':
+        rumah_sakit.maps = request.form.get('maps')
+        rumah_sakit.rumah_sakit = request.form.get('rumah_sakit')
+        rumah_sakit.rating = request.form.get('rating')
+        rumah_sakit.tipe = request.form.get('tipe')
+        rumah_sakit.jalan = request.form.get('jalan')
+        rumah_sakit.gambar = request.form.get('gambar')
+
+        db.session.commit()
+        flash("Rumah sakit berhasil diperbarui!", "success")
+        return redirect(url_for('rumah_sakit'))
+    
+    return render_template('admin/edit_rumah_sakit.html', rumah_sakit=rumah_sakit)
+
+@app.route('/admin/rumah_sakit/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_rumah_sakit(id):
+    rumah_sakit = RumahSakit.query.get_or_404(id)
+    db.session.delete(rumah_sakit)
+    db.session.commit()
+    flash("Rumah sakit berhasil dihapus!", "success")
+    return redirect(url_for('rumah_sakit'))
 
 #### Route Admin ###
 

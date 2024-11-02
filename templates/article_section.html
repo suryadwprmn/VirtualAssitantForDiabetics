@@ -22,7 +22,7 @@
 
         <!-- Article Content -->
         <div class="prose max-w-full text-gray-800">
-            {{ article.content.replace('\r\n', '<br>') | safe }}
+            {{ article.content.INSERT('\r\n', '<br>') | safe }}
         </div>
     </section>
 
