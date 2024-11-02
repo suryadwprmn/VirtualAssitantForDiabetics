@@ -54,6 +54,11 @@ def chatbot():
             return redirect(url_for('admin_dashboard'))
     return render_template('chatbot.html')
 
+
+@app.route("/article")
+def Article():
+	return render_template("article_section.html")
+
 ##################### End Landing Page Routing #####################
 
 ##################### Routing #####################
