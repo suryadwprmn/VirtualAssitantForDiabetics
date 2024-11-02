@@ -3,9 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Chat Popup</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,300;1,500&display=swap" rel="stylesheet">
 </head>
-<body>
-    INI CHATBOT!!!!!!!!
+<body class="bg-yellow-100 relative min-h-screen flex items-center justify-center">
+    
+    <!-- Tombol Chat -->
+    <div id="chatButton" class="fixed bottom-6 right-6 bg-black rounded-full p-3 cursor-pointer">
+        <img src="https://via.placeholder.com/24?text=%3A)" alt="Chat Icon" class="w-6 h-6">
+    </div>
+
+    <!-- Popup Chat -->
+    <div id="chatPopup" class="fixed bottom-20 right-6 bg-white w-80 p-4 rounded-lg shadow-lg hidden">
+        <!-- Header Popup -->
+        <div class="flex items-center space-x-2 mb-4">
+            <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                <img src="https://via.placeholder.com/24?text=%3A)" alt="Chat Icon" class="w-6 h-6">
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold">Fin</h2>
+                <p class="text-gray-500 text-sm">AI Agent answers instantly</p>
+            </div>
+        </div>
+        
+        <!-- Konten Pesan -->
+        <div class="bg-gray-100 p-3 rounded-lg mb-4 text-sm">
+            <p><strong>Bot</strong> - 1m ago.</p>
+            <p>Hi there, welcome to Intercom 👋<br>
+               You are now speaking with Fin AI Agent. I can do much more than chatbots you've seen before. Tell me as much as you can about your question and I'll do my best to help you in an instant.
+            </p>
+        </div>
+
+        <!-- Input Pesan -->
+        <div class="flex items-center space-x-2">
+            <input type="text" placeholder="Ask a question..." class="w-full p-2 border rounded-lg">
+            <button class="bg-blue-500 text-white p-2 rounded-lg">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Script untuk toggle popup
+        const chatButton = document.getElementById('chatButton');
+        const chatPopup = document.getElementById('chatPopup');
+
+        chatButton.addEventListener('click', () => {
+            chatPopup.classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>
