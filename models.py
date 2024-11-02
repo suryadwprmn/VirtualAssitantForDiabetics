@@ -42,5 +42,24 @@ class Article(db.Model):
         self.title = title
         self.content = content
         self.images = images
+        
+class RumahSakit(db.Model):
+    __tablename__ = 'rumah_sakit'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    maps = db.Column(db.String(255), nullable=True)
+    rumah_sakit = db.Column(db.String(255), nullable=False)
+    rating = db.Column(db.Float, nullable=True)
+    tipe = db.Column(db.String(50), nullable=True)
+    jalan = db.Column(db.String(255), nullable=True)
+    gambar = db.Column(db.String(255), nullable=True)  # Kolom gambar untuk menambahkan URL atau path gambar
+
+    def __init__(self, maps, rumah_sakit, rating, tipe, jalan, gambar=None):
+        self.maps = maps
+        self.rumah_sakit = rumah_sakit
+        self.rating = rating
+        self.tipe = tipe
+        self.jalan = jalan
+        self.gambar = gambar
 
 

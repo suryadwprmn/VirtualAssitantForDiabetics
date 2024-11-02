@@ -1,0 +1,80 @@
+{% extends 'admin/dashboard.html' %}
+
+{% block main_content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Data Rumah Sakit</h1>
+
+    {% include 'layout/alert.html' %}
+
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ url_for('create_rumah_sakit') }}" class="btn btn-primary">Tambah Rumah Sakit</a>
+    </div>
+
+    <table class="table table-bordered table-striped shadow-sm" id="rumahSakitTable">
+        <thead class="bg-primary text-white">
+            <tr>
+                <th scope="col">No</th>
+                <th scope="col">Maps</th>
+                <th scope="col">Rumah Sakit</th>
+                <th scope="col">Rating</th>
+                <th scope="col">Tipe</th>
+                <th scope="col">Jalan</th>
+                <th scope="col">Gambar</th>
+                <th scope="col">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rs in rumah_sakit_data %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    {% if rs.maps %}
+                        <a href="{{ rs.maps }}" target="_blank">Lihat Maps</a>
+                    {% else %}
+                        Tidak ada link
+                    {% endif %}
+                </td>
+                <td>{{ rs.rumah_sakit }}</td>
+                <td>{{ rs.rating }}</td>
+                <td>{{ rs.tipe }}</td>
+                <td>{{ rs.jalan }}</td>
+                <td>
+                    {% if rs.gambar %}
+                        <img src="{{ rs.gambar }}" alt="Gambar Rumah Sakit" width="50">
+                    {% else %}
+                        Tidak ada gambar
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('edit_rumah_sakit', id=rs.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="{{ url_for('delete_rumah_sakit', id=rs.id) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus rumah sakit ini?')">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">Tidak ada data rumah sakit</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#rumahSakitTable').DataTable({
+            "language": {
+                "search": "Cari:",
+                "lengthMenu": "Tampilkan _MENU_ entri per halaman",
+                "zeroRecords": "Tidak ada data yang ditemukan",
+                "info": "Menampilkan halaman _PAGE_ dari _PAGES_",
+                "infoEmpty": "Tidak ada data tersedia",
+                "infoFiltered": "(disaring dari _MAX_ total entri)"
+            }
+        });
+    });
+</script>
+{% endblock %}
