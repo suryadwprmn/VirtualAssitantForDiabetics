@@ -32,12 +32,60 @@ def Home():
 
 @app.route('/artikel')
 def artikel():
-    all_articles = Article.query.all()
+    # Ambil 9 artikel pertama untuk tampilan awal
+    initial_articles = Article.query.order_by(Article.id.desc()).limit(9).all()
+    
+    # Ambil artikel terbaru
+    latest_article = Article.query.order_by(Article.id.desc()).first()
+    
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
         if user.role == 'admin':
             return redirect(url_for('admin_dashboard'))
-    return render_template('article.html', articles=all_articles)
+    
+    return render_template('article.html', articles=initial_articles, latest_article=latest_article)
+
+
+@app.route('/load-more-articles')
+def load_more_articles():
+    page = int(request.args.get('page', 1))
+    per_page = 9  # Sesuaikan dengan jumlah artikel per load
+    
+    # Hitung offset
+    offset = (page - 1) * per_page
+    
+    # Query artikel berikutnya
+    articles = Article.query\
+        .order_by(Article.id.desc())\
+        .offset(offset)\
+        .limit(per_page)\
+        .all()
+    
+    # Hitung total artikel untuk mengecek apakah masih ada artikel lain
+    total_articles = Article.query.count()
+    has_more = (offset + per_page) < total_articles
+    
+    # Siapkan data artikel untuk JSON
+    articles_data = []
+    for article in articles:
+        articles_data.append({
+            'id': article.id,
+            'title': article.title,
+            'content': article.content,
+            'images': article.images if article.images else None
+        })
+    
+    return jsonify({
+        'articles': articles_data,
+        'has_more': has_more
+    })
+
+@app.route('/artikel/<int:article_id>')
+def article_page(article_id):
+    # Cari artikel berdasarkan ID
+    article = Article.query.get_or_404(article_id)
+    return render_template('article_section.html', article=article)
+
 
 @app.route('/cek_rs')
 def cek_rs():
