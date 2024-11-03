@@ -33,7 +33,7 @@ def Home():
 @app.route('/artikel')
 def artikel():
     # Ambil 9 artikel pertama untuk tampilan awal
-    initial_articles = Article.query.order_by(Article.id.desc()).limit(9).all()
+    initial_articles = Article.query.order_by(Article.id.desc()).limit().all()
     
     # Ambil artikel terbaru
     latest_article = Article.query.order_by(Article.id.desc()).first()
@@ -49,7 +49,7 @@ def artikel():
 @app.route('/load-more-articles')
 def load_more_articles():
     page = int(request.args.get('page', 1))
-    per_page = 9  # Sesuaikan dengan jumlah artikel per load
+    per_page = 3  # Sesuaikan dengan jumlah artikel per load
     
     # Hitung offset
     offset = (page - 1) * per_page
@@ -240,22 +240,41 @@ def rumah_sakit():
     all_rumah_sakit = RumahSakit.query.all()
     return render_template('admin/rumah_sakit.html', rumah_sakit_data=all_rumah_sakit)
 
-@app.route('/admin/rumah_sakit/create', methods=['GET', 'POST'])
+@app.route('/admin/rumah_sakit/tambah', methods=['GET', 'POST'])
 @login_required
 def create_rumah_sakit():
     if request.method == 'POST':
         maps = request.form.get('maps')
         rumah_sakit = request.form.get('rumah_sakit')
-        rating = request.form.get('rating')
+        rating = request.form.get('rating', type=float)
         tipe = request.form.get('tipe')
         jalan = request.form.get('jalan')
-        gambar = request.form.get('gambar')  # URL/path for the image
-
-        new_rumah_sakit = RumahSakit(maps=maps, rumah_sakit=rumah_sakit, rating=rating, tipe=tipe, jalan=jalan, gambar=gambar)
+        gambar = request.files.get('gambar')
+        
+        if not rumah_sakit:
+            flash('Nama rumah sakit harus diisi.', 'error')
+            return redirect(url_for('tambah_rumah_sakit'))
+        
+        gambar_filename = None
+        if gambar and allowed_file(gambar.filename):
+            filename = secure_filename(gambar.filename)
+            gambar_filename = f"{filename}"
+            gambar.save(os.path.join(app.config['UPLOAD_FOLDER'], gambar_filename))
+        
+        new_rumah_sakit = RumahSakit(
+            maps=maps,
+            rumah_sakit=rumah_sakit,
+            rating=rating,
+            tipe=tipe,
+            jalan=jalan,
+            gambar=gambar_filename
+        )
+        
         db.session.add(new_rumah_sakit)
         db.session.commit()
-        flash("Rumah sakit berhasil ditambahkan!", "success")
-        return redirect(url_for('rumah_sakit'))
+        
+        flash('Rumah sakit berhasil ditambahkan!', 'success')
+        return redirect(url_for('rumah_sakit'))  # Ganti 'tampil_rumah_sakit' dengan nama rute tampilan daftar rumah sakit.
     
     return render_template('admin/tambah_rumah_sakit.html')
 
@@ -263,28 +282,41 @@ def create_rumah_sakit():
 @login_required
 def edit_rumah_sakit(id):
     rumah_sakit = RumahSakit.query.get_or_404(id)
-
+    
     if request.method == 'POST':
         rumah_sakit.maps = request.form.get('maps')
         rumah_sakit.rumah_sakit = request.form.get('rumah_sakit')
-        rumah_sakit.rating = request.form.get('rating')
+        rumah_sakit.rating = request.form.get('rating', type=float)
         rumah_sakit.tipe = request.form.get('tipe')
         rumah_sakit.jalan = request.form.get('jalan')
-        rumah_sakit.gambar = request.form.get('gambar')
+
+        gambar = request.files.get('gambar')
+        if gambar and allowed_file(gambar.filename):
+            filename = secure_filename(gambar.filename)
+            gambar_filename = f"{filename}"
+            gambar.save(os.path.join(app.config['UPLOAD_FOLDER'], gambar_filename))
+            rumah_sakit.gambar = gambar_filename
 
         db.session.commit()
-        flash("Rumah sakit berhasil diperbarui!", "success")
-        return redirect(url_for('rumah_sakit'))
-    
+        flash('Rumah sakit berhasil diperbarui!', 'success')
+        return redirect(url_for('rumah_sakit'))  # Ganti dengan rute untuk menampilkan daftar rumah sakit
+
     return render_template('admin/edit_rumah_sakit.html', rumah_sakit=rumah_sakit)
 
-@app.route('/admin/rumah_sakit/delete/<int:id>', methods=['POST'])
+@app.route('/admin/rumah_sakit/hapus/<int:id>', methods=['POST'])
 @login_required
 def delete_rumah_sakit(id):
     rumah_sakit = RumahSakit.query.get_or_404(id)
+    
+    if rumah_sakit.gambar:
+        gambar_path = os.path.join(app.config['UPLOAD_FOLDER'], rumah_sakit.gambar)
+        if os.path.exists(gambar_path):
+            os.remove(gambar_path)
+    
     db.session.delete(rumah_sakit)
     db.session.commit()
-    flash("Rumah sakit berhasil dihapus!", "success")
+    
+    flash('Rumah sakit berhasil dihapus!', 'success')
     return redirect(url_for('rumah_sakit'))
 
 #### Route Admin ###
