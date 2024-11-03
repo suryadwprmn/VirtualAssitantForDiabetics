@@ -40,9 +40,9 @@
                 <td>{{ rs.jalan }}</td>
                 <td>
                     {% if rs.gambar %}
-                        <img src="{{ rs.gambar }}" alt="Gambar Rumah Sakit" width="50">
+                    <img src="{{ url_for('static', filename='uploads/' ~ rs.gambar) }}" alt="Gambar" width="100">
                     {% else %}
-                        Tidak ada gambar
+                    Tidak ada gambar
                     {% endif %}
                 </td>
                 <td>
