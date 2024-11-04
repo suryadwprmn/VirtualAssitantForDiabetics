@@ -52,7 +52,7 @@ class RumahSakit(db.Model):
     rating = db.Column(db.Float, nullable=True)
     tipe = db.Column(db.String(50), nullable=True)
     jalan = db.Column(db.String(255), nullable=True)
-    gambar = db.Column(db.String(255), nullable=True)  # Kolom gambar untuk menambahkan URL atau path gambar
+    gambar = db.Column(db.String(255), nullable=True)  
 
     def __init__(self, maps, rumah_sakit, rating, tipe, jalan, gambar=None):
         self.maps = maps
