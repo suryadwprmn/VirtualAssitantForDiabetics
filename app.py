@@ -33,7 +33,7 @@ def Home():
 @app.route('/artikel')
 def artikel():
     # Ambil 9 artikel pertama untuk tampilan awal
-    initial_articles = Article.query.order_by(Article.id.desc()).limit().all()
+    initial_articles = Article.query.order_by(Article.id.desc()).limit(9).all()
     
     # Ambil artikel terbaru
     latest_article = Article.query.order_by(Article.id.desc()).first()
@@ -49,7 +49,7 @@ def artikel():
 @app.route('/load-more-articles')
 def load_more_articles():
     page = int(request.args.get('page', 1))
-    per_page = 3  # Sesuaikan dengan jumlah artikel per load
+    per_page = 9  # Sesuaikan dengan jumlah artikel per load
     
     # Hitung offset
     offset = (page - 1) * per_page
@@ -79,6 +79,12 @@ def load_more_articles():
         'articles': articles_data,
         'has_more': has_more
     })
+    
+@app.template_filter('nl2br')
+def nl2br(value):
+    if value:
+        return value.replace('\n', '<br>\n')
+    return ''
 
 @app.route('/artikel/<int:article_id>')
 def article_page(article_id):
@@ -277,6 +283,9 @@ def create_rumah_sakit():
         return redirect(url_for('rumah_sakit'))  # Ganti 'tampil_rumah_sakit' dengan nama rute tampilan daftar rumah sakit.
     
     return render_template('admin/tambah_rumah_sakit.html')
+
+
+
 
 @app.route('/admin/rumah_sakit/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
