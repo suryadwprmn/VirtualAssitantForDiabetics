@@ -18,6 +18,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 ##################### Landing Page Routing #####################
+
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -26,9 +27,6 @@ def index():
             return redirect(url_for('admin_dashboard'))
     return render_template('index.html')
 
-@app.route("/home")
-def Home():
-	return render_template("Home.html")
 
 @app.route('/artikel')
 def artikel():
