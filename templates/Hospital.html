@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RRS-Rekomendasi Rumah Sakit</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,300;1,500&display=swap" rel="stylesheet">
+</head>
+<body class="bg-blue-800 p-4 md:p-10 font-sans">
+    <div class="container mx-auto p-4">
+
+        <h1 class="text-center text-white font-semibold text-2xl mb-12  ">Rumah sakit terdekat dengan anda</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <img class="w-full h-48 object-cover" src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Image of Location 1">
+                <div class="p-4">
+                    <h3 class="font-bold text-lg text-center">nama rumah sakit</h3>
+                    <p class="text-gray-600 text-center">jalan</p>
+                    <div class="flex items-center justify-between mt-2 mb-4">
+                        <span class="text-sm text-green-600 font-semibold">Tipe RS</span>
+                        <span class="text-gray-600 text-sm">rating 4.5⭐</span>
+                    </div>
+                    <a href="#" class="block">
+                        <div class="border bg-blue-700 p-2 rounded-lg text-center text-white hover:bg-blue-600 transition duration-200">
+                            Cek Rute
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
