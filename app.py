@@ -2,16 +2,20 @@ from flask import Flask, render_template, url_for,request,redirect,flash,abort,s
 from config import Config,db
 from werkzeug.utils import secure_filename
 import os
-from werkzeug.security import check_password_hash
-from models import User, Article, RumahSakit
+from werkzeug.security import generate_password_hash, check_password_hash
+from models import User, Article, RumahSakit, Pengguna
 from functools import wraps
-from werkzeug.security import generate_password_hash
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
+
 
 ### Menjalankan Flask
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = 'rahasia' 
 db.init_app(app)
+CORS(app)
+# jwt = JWTManager(app)
 
 # Fungsi cek ekstensi file yang diperbolehkan
 def allowed_file(filename):
@@ -334,96 +338,44 @@ def delete_rumah_sakit(id):
 ##################### API #####################
 # Mendapatkan semua pengguna
 @app.route('/api/users', methods=['GET'])
-def get_all_users():
-    users = User.query.all()
-    user_list = [
+def get_penggunas():
+    users = Pengguna.query.all()
+    users_data = [
         {
             'id': user.id,
             'name': user.name,
             'email': user.email,
-            'address': user.address,
-            'age': user.age,
             'gender': user.gender,
-            'category_diabetes': user.category_diabetes,
-            'role': user.role,
-            'created_at': user.created_at,
-            'updated_at': user.updated_at
-        } for user in users
+            'diabetes_category': user.diabetes_category,
+            'phone': user.phone,
+            'created_at': user.created_at.isoformat() if user.created_at else None
+        }
+        for user in users
     ]
-    return jsonify({'users': user_list})
+    return jsonify(users_data), 200
 
-# Mendapatkan detail pengguna berdasarkan ID
-@app.route('/api/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        abort(404, description="User not found")
-    
-    user_data = {
-        'id': user.id,
-        'name': user.name,
-        'email': user.email,
-        'address': user.address,
-        'age': user.age,
-        'gender': user.gender,
-        'category_diabetes': user.category_diabetes,
-        'role': user.role,
-        'created_at': user.created_at,
-        'updated_at': user.updated_at
-    }
-    return jsonify(user_data)
 
-# Menambahkan pengguna baru
-@app.route('/api/users', methods=['POST'])
-def create_user():
-    data = request.get_json()
-    hashed_password = generate_password_hash(data['password'], method='sha256')
-    new_user = User(
-        name=data['name'],
-        email=data['email'],
-        password=hashed_password,
-        address=data.get('address'),
-        age=data.get('age'),
-        gender=data['gender'],
-        category_diabetes=data['category_diabetes'],
-        role=data.get('role', 'User')
-    )
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({'message': 'User created successfully'}), 201
 
-# Mengedit data pengguna
-@app.route('/api/users/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        abort(404, description="User not found")
-    
-    data = request.get_json()
-    user.name = data.get('name', user.name)
-    user.email = data.get('email', user.email)
-    user.address = data.get('address', user.address)
-    user.age = data.get('age', user.age)
-    user.gender = data.get('gender', user.gender)
-    user.category_diabetes = data.get('category_diabetes', user.category_diabetes)
-    user.role = data.get('role', user.role)
-    if 'password' in data:
-        user.password = generate_password_hash(data['password'], method='sha256')
-    
-    db.session.commit()
-    return jsonify({'message': 'User updated successfully'})
+# @app.route('/api/login', methods=['POST'])
+# def login_user():
+#     data = request.get_json()
+#     if not data or not all(key in data for key in ('email', 'password')):
+#         return jsonify({'error': 'Missing email or password'}), 400
 
-# Menghapus pengguna
-@app.route('/api/users/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        abort(404, description="User not found")
-    
-    db.session.delete(user)
-    db.session.commit()
-    return jsonify({'message': 'User deleted successfully'})
-    
+#     user = Pengguna.query.filter_by(email=data['email']).first()
+#     if not user or not check_password_hash(user.password, data['password']):
+#         return jsonify({'error': 'Invalid email or password'}), 401
+
+#     # Buat token akses JWT
+#     access_token = create_access_token(identity=user.id)
+#     return jsonify({'access_token': access_token}), 200
+
+# @app.route('/protected', methods=['GET'])
+# @jwt_required()
+# def protected():
+#     # Mendapatkan id pengguna dari token JWT
+#     current_user_id = get_jwt_identity()
+#     return jsonify({'message': f'Hello user {current_user_id}'}), 200
 
 
 @app.route('/api/artikel', methods=['GET'])

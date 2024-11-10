@@ -1,4 +1,5 @@
 from config import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -61,5 +62,33 @@ class RumahSakit(db.Model):
         self.tipe = tipe
         self.jalan = jalan
         self.gambar = gambar
+        
+        
+class Pengguna(db.Model):
+    __tablename__ = 'pengguna'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False)  # This will store the hashed password
+    gender = db.Column(db.Enum('Laki-laki', 'Perempuan'), nullable=False)
+    diabetes_category = db.Column(
+        db.Enum('Non Diabetes', 'Diabetes 1', 'Diabetes 2'), nullable=False
+    )
+    phone = db.Column(db.String(15))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    def __init__(self, name, email, password, gender, diabetes_category, phone=None):
+        self.name = name
+        self.email = email
+        # Hash the password before saving it to the database
+        self.password = generate_password_hash(password)
+        self.gender = gender
+        self.diabetes_category = diabetes_category
+        self.phone = phone
+
+    # Function to verify password
+    def verify_password(self, password):
+        return check_password_hash(self.password, password)
 
 
