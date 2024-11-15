@@ -6,7 +6,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, Article, RumahSakit, Pengguna
 from functools import wraps
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
+from datetime import datetime, timedelta
+import jwt
+# from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
 
 
 ### Menjalankan Flask
@@ -354,28 +356,135 @@ def get_penggunas():
     ]
     return jsonify(users_data), 200
 
+@app.route('/api/register', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    
+    if not all(key in data for key in ('name', 'email', 'password', 'gender', 'diabetes_category')):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    if Pengguna.query.filter_by(email=data['email']).first():
+        return jsonify({'error': 'Email is already registered'}), 400
+    
+    # Create a new user instance
+    new_user = Pengguna(
+        name=data['name'],
+        email=data['email'],
+        password=data['password'],  
+        gender=data['gender'],
+        diabetes_category=data['diabetes_category'],
+        phone=data.get('phone')
+    )
+    
+  
+    db.session.add(new_user)
+    db.session.commit()
+    
+    # Return the created user data
+    registered_user = {
+        'id': new_user.id,
+        'name': new_user.name,
+        'email': new_user.email,
+        'gender': new_user.gender,
+        'diabetes_category': new_user.diabetes_category,
+        'phone': new_user.phone,
+        'created_at': new_user.created_at.isoformat() if new_user.created_at else None
+    }
+    return jsonify(registered_user), 201
 
 
-# @app.route('/api/login', methods=['POST'])
-# def login_user():
-#     data = request.get_json()
-#     if not data or not all(key in data for key in ('email', 'password')):
-#         return jsonify({'error': 'Missing email or password'}), 400
+@app.route('/api/login', methods=['POST'])
+def login_user():
+    data = request.get_json()
+    
+    if not all(key in data for key in ('email', 'password')):
+        return jsonify({'error': 'Email and password are required'}), 400
+    
+    user = Pengguna.query.filter_by(email=data['email']).first()
+    
+    if not user or not check_password_hash(user.password, data['password']):
+        return jsonify({'error': 'Invalid email or password'}), 401
+    
+    # Generate JWT token menggunakan SECRET_KEY dari config
+    token_payload = {
+        'user_id': user.id,
+        'email': user.email,
+        'exp': datetime.utcnow() + timedelta(hours=1)  
+    }
+    
+    access_token = jwt.encode(token_payload, Config.SECRET_KEY, algorithm='HS256')
+    
+    # Response dengan token
+    user_data = {
+        'name': user.name,
+        'email': user.email,
+        'gender': user.gender,
+        'diabetes_category': user.diabetes_category,
+        'phone': user.phone,
+        'access_token': access_token
+    }
+    
+    return jsonify(user_data), 200
 
-#     user = Pengguna.query.filter_by(email=data['email']).first()
-#     if not user or not check_password_hash(user.password, data['password']):
-#         return jsonify({'error': 'Invalid email or password'}), 401
+# Decorator untuk protected routes
+def token_required(f):
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 401
+        
+        try:
+            # Remove 'Bearer ' prefix if present
+            if token.startswith('Bearer '):
+                token = token[7:]
+                
+            data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+            current_user = Pengguna.query.get(data['user_id'])
+            
+            if not current_user:
+                return jsonify({'error': 'User not found'}), 401
+                
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Token is invalid', 'details': str(e)}), 401
+            
+        return f(current_user, *args, **kwargs)
+    
+    decorated.__name__ = f.__name__
+    return decorated
 
-#     # Buat token akses JWT
-#     access_token = create_access_token(identity=user.id)
-#     return jsonify({'access_token': access_token}), 200
-
-# @app.route('/protected', methods=['GET'])
-# @jwt_required()
-# def protected():
-#     # Mendapatkan id pengguna dari token JWT
-#     current_user_id = get_jwt_identity()
-#     return jsonify({'message': f'Hello user {current_user_id}'}), 200
+# Route untuk mendapatkan profil user
+@app.route('/api/profile', methods=['GET'])
+@token_required
+def get_profile(current_user):
+    user_data = {
+        'name': current_user.name,
+        'email': current_user.email,
+        'gender': current_user.gender,
+        'diabetes_category': current_user.diabetes_category,
+        'phone': current_user.phone
+    }
+    return jsonify(user_data), 200
+    
+@app.route('/api/users/<int:id>', methods=['GET'])
+def get_pengguna(id):
+    user = Pengguna.query.get(id)
+    if user is None:
+        return jsonify({'error': 'User not found'}), 404
+    
+    user_data = {
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'gender': user.gender,
+        'diabetes_category': user.diabetes_category,
+        'phone': user.phone,
+        'created_at': user.created_at.isoformat() if user.created_at else None
+    }
+    
+    return jsonify(user_data), 200
 
 
 @app.route('/api/artikel', methods=['GET'])
