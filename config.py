@@ -12,5 +12,5 @@ class Config:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # Maksimal 2MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    # JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt_rahasia')
-    # JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)  
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt_rahasia')
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)  
