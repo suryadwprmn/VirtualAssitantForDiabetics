@@ -77,11 +77,13 @@ class Pengguna(db.Model):
     )
     phone = db.Column(db.String(15))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+    
+     # Relationship to CatatanGulaDarah (one to many)
+    catatan_gula_darah = db.relationship('CatatanGulaDarah', backref='pengguna_catatan', lazy=True)
 
     def __init__(self, name, email, password, gender, diabetes_category, phone=None):
         self.name = name
         self.email = email
-        # Hash the password before saving it to the database
         self.password = generate_password_hash(password)
         self.gender = gender
         self.diabetes_category = diabetes_category
@@ -90,5 +92,24 @@ class Pengguna(db.Model):
     # Function to verify password
     def verify_password(self, password):
         return check_password_hash(self.password, password)
+    
+class CatatanGulaDarah(db.Model):
+    __tablename__ = 'catatan_gula_darah'
+
+    id = db.Column(db.Integer, primary_key=True)
+    pengguna_id = db.Column(db.Integer, db.ForeignKey('pengguna.id'), nullable=False)
+    tanggal = db.Column(db.Date, nullable=False)
+    waktu = db.Column(db.Enum('Pagi', 'Siang', 'Malam'), nullable=False)  # Store the time of day
+    gula_darah = db.Column(db.Float, nullable=False)
+
+    # Relationship to Pengguna
+    pengguna = db.relationship('Pengguna', backref=db.backref('catatan_user', lazy=True))
+
+    def __init__(self, pengguna_id, tanggal, waktu, gula_darah):
+        self.pengguna_id = pengguna_id
+        self.tanggal = tanggal
+        self.waktu = waktu
+        self.gula_darah = gula_darah
+
 
 
