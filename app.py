@@ -3,7 +3,7 @@ from config import Config,db
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Article, RumahSakit, Pengguna
+from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah
 from functools import wraps
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -486,20 +486,58 @@ def get_pengguna(id):
     
     return jsonify(user_data), 200
 
+@app.route('/api/gula_darah', methods=['POST'])
+@token_required
+def tambah_gula_darah(current_user):
+    data = request.get_json()
+    # Validasi input
+    if not all(key in data for key in ('tanggal', 'waktu', 'gula_darah')):
+        return jsonify({'error': 'Tanggal, waktu, dan gula darah wajib diisi'}), 400
+    try:
+        # Parsing dan validasi nilai input
+        tanggal = datetime.strptime(data['tanggal'], '%Y-%m-%d').date()
+        waktu = data['waktu']
+        gula_darah = float(data['gula_darah'])
 
-@app.route('/api/artikel', methods=['GET'])
-def get_all_articles():
-    all_articles = Article.query.all()
-    articles = [
-        {
-            'id': article.id,
-            'title': article.title,
-            'content': article.content,
-            'images': article.images  # Pastikan 'images' adalah atribut dari model Article
-        } 
-        for article in all_articles
-    ]
-    return jsonify({'articles': articles})
+        if waktu not in ['Pagi', 'Siang', 'Malam']:
+            return jsonify({'error': 'Waktu harus berupa salah satu dari Pagi, Siang, atau Malam'}), 400
+
+        if gula_darah <= 0:
+            return jsonify({'error': 'Nilai gula darah harus lebih dari 0'}), 400
+
+        # Membuat instance CatatanGulaDarah
+        catatan = CatatanGulaDarah(
+            pengguna_id=current_user.id,
+            tanggal=tanggal,
+            waktu=waktu,
+            gula_darah=gula_darah
+        )
+
+        # Menyimpan data ke database
+        db.session.add(catatan)
+        db.session.commit()
+
+        return jsonify({'message': 'Data gula darah berhasil disimpan'}), 201
+
+    except ValueError as e:
+        return jsonify({'error': f'Input tidak valid: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
+
+
+# @app.route('/api/artikel', methods=['GET'])
+# def get_all_articles():
+#     all_articles = Article.query.all()
+#     articles = [
+#         {
+#             'id': article.id,
+#             'title': article.title,
+#             'content': article.content,
+#             'images': article.images  # Pastikan 'images' adalah atribut dari model Article
+#         } 
+#         for article in all_articles
+#     ]
+#     return jsonify({'articles': articles})
 
 
 ##################### End API #####################
