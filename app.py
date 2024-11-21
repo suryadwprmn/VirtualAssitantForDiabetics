@@ -523,21 +523,47 @@ def tambah_gula_darah(current_user):
         return jsonify({'error': f'Input tidak valid: {str(e)}'}), 400
     except Exception as e:
         return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
+    
+@app.route('/api/gula_darah/terakhir', methods=['GET'])
+@token_required
+def get_gula_darah_terakhir(current_user):
+    try:
+        # Ambil data gula darah terakhir berdasarkan pengguna
+        catatan_terakhir = (
+            CatatanGulaDarah.query
+            .filter_by(pengguna_id=current_user.id)  # Filter berdasarkan pengguna
+            .order_by(CatatanGulaDarah.tanggal.desc(), CatatanGulaDarah.id.desc())  # Urutkan berdasarkan tanggal (terbaru)
+            .first()  # Ambil data pertama
+        )
+
+        if not catatan_terakhir:
+            return jsonify({'error': 'Belum ada data gula darah yang tercatat'}), 404
+
+        # Kembalikan data dalam format JSON
+        return jsonify({
+            'id': catatan_terakhir.id,
+            'tanggal': catatan_terakhir.tanggal.strftime('%Y-%m-%d'),
+            'waktu': catatan_terakhir.waktu,
+            'gula_darah': catatan_terakhir.gula_darah
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
 
 
-# @app.route('/api/artikel', methods=['GET'])
-# def get_all_articles():
-#     all_articles = Article.query.all()
-#     articles = [
-#         {
-#             'id': article.id,
-#             'title': article.title,
-#             'content': article.content,
-#             'images': article.images  # Pastikan 'images' adalah atribut dari model Article
-#         } 
-#         for article in all_articles
-#     ]
-#     return jsonify({'articles': articles})
+@app.route('/api/artikel', methods=['GET'])
+def get_all_articles():
+    all_articles = Article.query.all()
+    articles = [
+        {
+            'id': article.id,
+            'title': article.title,
+            'content': article.content,
+            'images': article.images  # Pastikan 'images' adalah atribut dari model Article
+        } 
+        for article in all_articles
+    ]
+    return jsonify({'articles': articles})
 
 
 ##################### End API #####################
