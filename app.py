@@ -8,6 +8,7 @@ from functools import wraps
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import jwt
+from sqlalchemy.sql.expression import func
 # from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
 
 
@@ -31,7 +32,10 @@ def index():
         user = User.query.get(session['user_id'])
         if user.role == 'admin':
             return redirect(url_for('admin_dashboard'))
-    return render_template('index.html')
+    
+    # ambil 5 rs terdekat
+    rs_terdekat = RumahSakit.query.order_by(func.random()).limit(5).all()
+    return render_template('index.html', rs_terdekat=rs_terdekat)
 
 
 @app.route('/artikel')
@@ -103,7 +107,16 @@ def cek_rs():
         user = User.query.get(session['user_id'])
         if user.role == 'admin':
             return redirect(url_for('admin_dashboard'))
-    return render_template('Hospital.html')
+
+    # Ambil parameter halaman dari URL (default ke halaman 1)
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Total item per halaman
+
+    # Query rumah sakit dengan pagination
+    pagination = RumahSakit.query.paginate(page=page, per_page=per_page)
+    rs_list = pagination.items
+
+    return render_template('Hospital.html', rs_list=rs_list, pagination=pagination)
 
 @app.route('/chatbot')
 def chatbot():
@@ -524,6 +537,50 @@ def tambah_gula_darah(current_user):
     except Exception as e:
         return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
     
+from datetime import datetime, timedelta
+
+@app.route('/api/gula_darah/seminggu', methods=['GET'])
+@token_required
+def get_gula_darah(current_user):
+    try:
+        # Hitung batas waktu seminggu terakhir
+        hari_ini = datetime.now().date()
+        seminggu_lalu = hari_ini - timedelta(days=7)
+
+        # Ambil data gula darah pengguna dalam seminggu terakhir
+        catatan = CatatanGulaDarah.query.filter(
+            CatatanGulaDarah.pengguna_id == current_user.id,
+            CatatanGulaDarah.tanggal >= seminggu_lalu
+        ).all()
+
+        if not catatan:
+            return jsonify({'message': 'Tidak ada data gula darah ditemukan dalam seminggu terakhir'}), 404
+
+        # Organisasi data per tanggal
+        data_per_tanggal = {}
+        for item in catatan:
+            if item.tanggal not in data_per_tanggal:
+                data_per_tanggal[item.tanggal] = []
+            data_per_tanggal[item.tanggal].append(item.gula_darah)
+
+        # Hitung rata-rata gula darah per hari
+        rata_rata_per_hari = []
+        for tanggal, nilai_gula_darah in data_per_tanggal.items():
+            rata_rata = sum(nilai_gula_darah) / len(nilai_gula_darah)
+            rata_rata_per_hari.append({
+                'tanggal': tanggal.strftime('%Y-%m-%d'),
+                'rata_rata_gula_darah': round(rata_rata, 2)
+            })
+
+        # Urutkan berdasarkan tanggal
+        rata_rata_per_hari = sorted(rata_rata_per_hari, key=lambda x: x['tanggal'])
+
+        return jsonify({'data': rata_rata_per_hari}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
+
+                
 @app.route('/api/gula_darah/terakhir', methods=['GET'])
 @token_required
 def get_gula_darah_terakhir(current_user):

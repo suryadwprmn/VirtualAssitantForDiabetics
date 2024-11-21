@@ -179,6 +179,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script>
+  // Ambil tombol hamburger dan menu
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const menu = document.getElementById('menu');
+
+  // Tambahkan event listener untuk toggle menu
+  hamburgerBtn.addEventListener('click', () => {
+    menu.classList.toggle('hidden'); 
+  });
+</script>
 
   
 </body>

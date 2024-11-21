@@ -11,10 +11,12 @@
     <title>Divistant - Sahabat Virtual untuk Hidup Lebih Sehat</title>
 </head>
 <body >
-    <div class="text-center bg-blue-900 p-4 sm:p-6 md:p-10 lg:p-12">
+ 
+    
+    <div class="text-center bg-blue-900 p-4 sm:p-6 md:p-10 lg:p-12 ">
         {% include 'layout/navbar.html'%}
-        <img src="{{url_for('static', filename='/img/Logo1.png')}}" alt="Logo Divistant" class="bg-blue-900 mx-auto" style="width: 200px;">
-        <h5 class="font-bold text-center text-white font-sans text-base sm:text-lg md:text-xl">Divistant, Sahabat Virtual untuk Hidup Lebih Sehat Bersama Diabetes.</h5>
+        
+        <h5 class="font-bold text-center text-white font-sans text-base sm:text-lg md:text-xl mt-8">Divistant, Sahabat Virtual untuk Hidup Lebih Sehat Bersama Diabetes.</h5>
     </div>
 
     <section class="bg-blue-100 dark:bg-blue-900 py-8 sm:py-16 md:py-20 lg:py-24">
@@ -122,54 +124,25 @@
                     </p>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-
+                        {% for rs in rs_terdekat %}
                         <div class="bg-white shadow-lg rounded-lg p-6">
-                            <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Trusted contacts for transfers" class="mb-4 rounded-md block mx-auto">
-
-                            <h3 class="text-lg font-medium text-gray-800 mb-2">RS Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus, ut.</h3>
-
-                            <p class="text-gray-600 text-sm sm:text-base">Trusted contacts for transferring money securely.</p>
-                        </div>
-
-                        <div class="bg-white shadow-lg rounded-lg p-6">
+                            <img src="{{ url_for('static', filename='uploads/' + rs.gambar) }}" alt="{{ rs.rumah_sakit }}" class="mb-4 rounded-md block mx-auto">
                             
-                            <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Blocks on gambling, cigarettes & alcohol" class="mb-4 rounded-md block mx-auto">
+                            <!-- Nama Rumah Sakit -->
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">{{ rs.rumah_sakit }}</h3>
                             
-                            <h3 class="text-lg font-medium text-gray-800 mb-2">RS Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus, ut.</h3>
+                            <!-- Informasi Tambahan -->
+                            <p class="text-gray-600 text-sm sm:text-base">
+                                Rating: {{ rs.rating }} / 5 ⭐<br>
+                                <a href="{{ rs.maps }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded inline-block transition duration-300">
+                                    Lihat Maps
+                                </a>
+                            </p>
                             
-                            <p class="text-gray-600 text-sm sm:text-base">Avoid unwanted purchases with spending controls.</p>
                         </div>
-
-                        <div class="bg-white shadow-lg rounded-lg p-6">
-                        
-                            <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Get instant payment notifications" class="mb-4 rounded-md block mx-auto">
-                        
-                            <h3 class="text-lg font-medium text-gray-800 mb-2">RS Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus, ut.</h3>
-                        
-                            <p class="text-gray-600 text-sm sm:text-base">Stay informed about your family's spending.</p>
-                        </div>
-                        
-                        <div class="bg-white shadow-lg rounded-lg p-6">
-                        
-                            <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="Trusted by 3M+ families worldwide" class="mb-4 rounded-md block mx-auto">
-                        
-                            <h3 class="text-lg font-medium text-gray-800 mb-2">RS Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus, ut.</h3>
-                        
-                            <p class="text-gray-600 text-sm sm:text-base">Millions of families rely on Revolutions for their financial independence.</p>
-
-                        </div>
-                        
-                        <div class="bg-white shadow-lg rounded-lg p-6">
-
-                            <img src="{{url_for('static', filename='/img/cek.jpg')}}" alt="In-app card controls, freeze & unfreeze in a tap" class="mb-4 rounded-md block mx-auto">
-                        
-                            <h3 class="text-lg font-medium text-gray-800 mb-2">RS Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus, ut.</h3>
-                        
-                            <p class="text-gray-600 text-sm sm:text-base">Secure your family's finances with instant card management.</p>
-                        
-                        </div>
-                    
+                        {% endfor %}
                     </div>
+                    
                     
                     <div class="mt-8 text-center">
                     
@@ -302,6 +275,17 @@
             if (e.key === 'Enter') sendMessage();
         });
     </script>
+
+    <script>
+        // Ambil tombol hamburger dan menu
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const menu = document.getElementById('menu');
+      
+        // Tambahkan event listener untuk toggle menu
+        hamburgerBtn.addEventListener('click', () => {
+          menu.classList.toggle('hidden'); 
+        });
+      </script>
 </body>
 
 </html>

@@ -1,23 +1,36 @@
-<nav class="bg-white shadow-lg rounded-xl flex items-center justify-center p-5">
-  <ul class="ml-16 flex space-x-8">
+<nav class="bg-white shadow-lg rounded-xl p-3 flex items-center justify-between relative">
+  <div class="font-semibold text-black text-xl flex items-center space-x-2">
+
+    <a href="{{ url_for('index') }}" class="no-underline flex items-center">
+      <img src="{{ url_for('static', filename='/img/bg.png') }}" alt="Logo Divistant" style="width: 200px; height:auto;">
+
+    </a>
+  </div>
+  
+  <button id="hamburger-btn" class="md:hidden text-black focus:outline-none" aria-label="Toggle navigation">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7"></path>
+    </svg>
+  </button>
+
+  <!-- Menu -->
+  <ul id="menu" class="hidden md:flex md:flex-row md:space-x-8 flex-col space-y-2 md:space-y-0 absolute right-0 left-0 top-full bg-white shadow-lg rounded-md p-4 md:p-0 md:shadow-none md:static">
     <li>
-      <a href="#" 
-         class="text-black no-underline px-4 py-1 font-normal hover:text-gray-500 transition duration-300">
-        Home
+      <a href="{{ url_for('index') }}" class="text-black no-underline px-4 py-2 font-normal hover:text-gray-500 transition duration-300">
+        Beranda
       </a>
     </li>
     <li>
-      <a href="{{ url_for('artikel') }}" 
-         class="text-black no-underline px-4 py-1 font-normal hover:text-gray-500 transition duration-300">
+      <a href="{{ url_for('artikel') }}" class="text-black no-underline px-4 py-2 font-normal hover:text-gray-500 transition duration-300">
         Artikel
       </a>
     </li>
     <li>
-      <a href="{{ url_for('cek_rs') }}" 
-         class="text-black no-underline px-4 py-1 font-normal hover:text-gray-500 transition duration-300">
+      <a href="{{ url_for('cek_rs') }}" class="text-black no-underline px-4 py-2 font-normal hover:text-gray-500 transition duration-300">
         Rekomendasi
       </a>
     </li>
   </ul>
 </nav>
+
 
