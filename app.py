@@ -422,7 +422,7 @@ def login_user():
     token_payload = {
         'user_id': user.id,
         'email': user.email,
-        'exp': datetime.utcnow() + timedelta(hours=1)  
+        'exp': datetime.utcnow() + timedelta(days=30)  
     }
     
     access_token = jwt.encode(token_payload, Config.SECRET_KEY, algorithm='HS256')
@@ -469,18 +469,48 @@ def token_required(f):
     return decorated
 
 # Route untuk mendapatkan profil user
-@app.route('/api/profile', methods=['GET'])
+@app.route('/api/profile', methods=['GET', 'PUT'])
 @token_required
 def get_profile(current_user):
-    user_data = {
-        'name': current_user.name,
-        'email': current_user.email,
-        'gender': current_user.gender,
-        'diabetes_category': current_user.diabetes_category,
-        'phone': current_user.phone
-    }
-    return jsonify(user_data), 200
+    if request.method == 'GET':
+        user_data = {
+            'name': current_user.name,
+            'email': current_user.email,
+            'gender': current_user.gender,
+            'diabetes_category': current_user.diabetes_category,
+            'phone': current_user.phone
+        }
+        return jsonify(user_data), 200
     
+    elif request.method == 'PUT':
+        # Ambil data dari request body
+        data = request.get_json()
+        
+        #Validasi input
+        if not data:
+            return jsonify({'error': 'Data is missing'}), 400
+        
+        #Perbarui data pengguna 
+        if 'name' in data:
+            current_user.name = data['name']
+        if 'gender' in data:
+            current_user.gender = data['gender']
+        if 'diabetes_category' in data:
+            current_user.diabetes_category = data['diabetes_category']
+        if 'phone' in data:
+            current_user.phone = data['phone']
+        if 'password' in data:
+            hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256', salt_length=8)
+            current_user.password = hashed_password
+            
+        try:
+            db.session.commit()
+            return jsonify({'message': 'Profile updated successfully'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Failed to update profile', 'details': str(e)}), 500
+        
+        
 @app.route('/api/users/<int:id>', methods=['GET'])
 def get_pengguna(id):
     user = Pengguna.query.get(id)
