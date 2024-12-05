@@ -80,6 +80,9 @@ class Pengguna(db.Model):
     
      # Relationship to CatatanGulaDarah (one to many)
     catatan_gula_darah = db.relationship('CatatanGulaDarah', backref='pengguna_catatan', lazy=True)
+    
+    # Relationship to HbA1c (one to many) with a different backref name to avoid conflict
+    hba1c_records = db.relationship('HbA1c', backref='pengguna_hba1c', lazy=True)
 
     def __init__(self, name, email, password, gender, diabetes_category, phone=None):
         self.name = name
@@ -112,4 +115,18 @@ class CatatanGulaDarah(db.Model):
         self.gula_darah = gula_darah
 
 
+class HbA1c(db.Model):
+    __tablename__ = 'hba1c'
+
+    id = db.Column(db.Integer, primary_key=True)
+    pengguna_id = db.Column(db.Integer, db.ForeignKey('pengguna.id'), nullable=False)
+    hba1c = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    # Relationship to Pengguna
+    pengguna = db.relationship('Pengguna', backref=db.backref('hba1c_user', lazy=True))
+
+    def __init__(self, pengguna_id, hba1c):
+        self.pengguna_id = pengguna_id
+        self.hba1c = hba1c
 

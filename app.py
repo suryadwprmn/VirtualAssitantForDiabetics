@@ -3,7 +3,7 @@ from config import Config,db
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah
+from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah, HbA1c
 from functools import wraps
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -567,7 +567,7 @@ def tambah_gula_darah(current_user):
     except Exception as e:
         return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
     
-from datetime import datetime, timedelta
+
 
 @app.route('/api/gula_darah/seminggu', methods=['GET'])
 @token_required
@@ -584,7 +584,7 @@ def get_gula_darah(current_user):
         ).all()
 
         if not catatan:
-            return jsonify({'message': 'Tidak ada data gula darah ditemukan dalam seminggu terakhir'}), 404
+            return jsonify({'message': 'Tidak ada data gula darah ditemukan dalam seminggu terakhirs'}), 404
 
         # Organisasi data per tanggal
         data_per_tanggal = {}
@@ -636,6 +636,63 @@ def get_gula_darah_terakhir(current_user):
 
     except Exception as e:
         return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
+    
+@app.route('/api/hba1c', methods=['POST'])
+@token_required
+def tambah_hba1c(current_user):
+    data = request.get_json()
+
+    # Validasi input
+    if 'hba1c' not in data:
+        return jsonify({'error': 'Nilai HbA1c wajib diisi'}), 400
+
+    try:
+        hba1c = float(data['hba1c'])
+
+        if hba1c <= 0:
+            return jsonify({'error': 'Nilai HbA1c harus lebih dari 0'}), 400
+
+        # Membuat instance HbA1c
+        catatan_hba1c = HbA1c(
+            pengguna_id=current_user.id,
+            hba1c=hba1c
+        )
+
+        # Menyimpan data ke database
+        db.session.add(catatan_hba1c)
+        db.session.commit()
+
+        return jsonify({'message': 'Data HbA1c berhasil disimpan'}), 201
+
+    except ValueError as e:
+        return jsonify({'error': f'Input tidak valid: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
+
+@app.route('/api/hba1c/terakhir', methods=['GET'])
+@token_required
+def get_hba1c_terakhir(current_user):
+    try:
+        # Ambil data HbA1c terakhir berdasarkan pengguna, urutkan berdasarkan created_at (terbaru)
+        hba1c_terakhir = (
+            HbA1c.query
+            .filter_by(pengguna_id=current_user.id)  # Filter berdasarkan pengguna
+            .order_by(HbA1c.created_at.desc())  # Urutkan berdasarkan created_at (terbaru)
+            .first()  # Ambil data pertama (terbaru)
+        )
+        
+        if not hba1c_terakhir:
+            return jsonify({'error': 'Belum ada data HbA1c yang tercatat'}), 404
+
+        # Kembalikan data dalam format JSON
+        return jsonify({
+            'id': hba1c_terakhir.id,
+            'hba1c': hba1c_terakhir.hba1c,
+            'created_at': hba1c_terakhir.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Kesalahan server: {str(e)}'}), 500
 
 
 @app.route('/api/artikel', methods=['GET'])
@@ -646,7 +703,7 @@ def get_all_articles():
             'id': article.id,
             'title': article.title,
             'content': article.content,
-            'images': article.images  # Pastikan 'images' adalah atribut dari model Article
+            'images': article.images  
         } 
         for article in all_articles
     ]
