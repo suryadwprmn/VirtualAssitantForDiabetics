@@ -1,0 +1,45 @@
+{% extends 'admin/app.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Tambah Rumah Sakit</h1>
+
+    {% include 'layout/alert.html' %}
+
+    <form method="POST" enctype="multipart/form-data" class="p-4 border rounded shadow-sm bg-light">
+        <div class="mb-3">
+            <label for="maps" class="form-label">Maps:</label>
+            <input type="text" id="maps" name="maps" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="rumah_sakit" class="form-label">Nama Rumah Sakit:</label>
+            <input type="text" id="rumah_sakit" name="rumah_sakit" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="rating" class="form-label">Rating:</label>
+            <input type="number" step="0.1" id="rating" name="rating" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="tipe" class="form-label">Tipe:</label>
+            <input type="text" id="tipe" name="tipe" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="jalan" class="form-label">Alamat Jalan:</label>
+            <input type="text" id="jalan" name="jalan" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="gambar" class="form-label">Gambar:</label>
+            <input type="file" id="gambar" name="gambar" accept="image/*" class="form-control">
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Tambah Rumah Sakit</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

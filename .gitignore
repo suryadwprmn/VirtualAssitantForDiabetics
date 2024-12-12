@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+model/model.safetensors
+model/*.json
+model/*.txt
+

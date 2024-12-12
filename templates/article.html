@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page Artikel</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,300;1,500&display=swap" rel="stylesheet">
+    
+</head>
+<body >
+
+  <!-- Hero Section -->
+ 
+  <section class="bg-blue-900 ">
+    <div class="p-4 sm:p-6 md:p-10 lg:p-12">
+    {% include 'layout/navbar.html'%}
+  </div>
+    <section class="max-w-6xl mx-auto p-4 md:p-8 mb-10">
+      <h1 class="text-white mx-10 mt-12 text-center font-extrabold text-4xl">
+        Baca artikel mengenai kesehatan anda di sini!
+      </h1>
+
+      {% if latest_article %}
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row mt-20">
+            <div class="md:w-1/2">
+                {% if latest_article.images %}
+                    <img src="{{ url_for('static', filename='uploads/' + latest_article.images) }}" class="w-full h-full object-cover" alt="{{ latest_article.title }}">
+                {% else %}
+                    <img src="{{url_for('static', filename='/img/cek.jpg')}}" class="w-full h-full object-cover" alt="Default Image">
+                {% endif %}
+            </div>
+            <div class="p-6 md:w-1/2">
+                <span class="text-blue-600 font-semibold text-sm">Artikel Terbaru!</span>
+                <h2 class="text-3xl font-bold mt-2">{{ latest_article.title }}</h2>
+                <p class="mt-4 mb-4 text-gray-600">{{ latest_article.content[:200] }}...</p>
+                <a class="bg-blue-900 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full hover:bg-white hover:text-blue-800 transition-colors duration-500 inline-flex items-center font-sans" 
+                href="{{ url_for('article_page', article_id=latest_article.id) }}">
+                Baca Selengkapnya → 
+             </a>
+             
+            </div>
+        </div>
+      {% endif %}
+    </section>
+
+
+    <!-- Recent Articles Section -->
+    <div class="bg-white dark:bg-gray-800">
+      <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="bg-white">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="bg-white dark:fill-blue-900">
+          </path>
+      </svg>
+  </div>
+ 
+  <section class="bg-white">
+    <section class="max-w-6xl mx-auto p-4 md:p-8">
+      <h2 class="text-2xl font-semibold mb-6">Artikel Terbaru Kami</h2>
+      <div class="grid gap-6 md:grid-cols-3">
+        {% for article in articles %}
+          <div class="bg-blue-900 hover:bg-blue-800 transition-colors duration-500 shadow-lg rounded-lg overflow-hidden">
+            {% if article.images %}
+              <img src="{{ url_for('static', filename='uploads/' + article.images) }}" alt="Gambar Artikel" class="w-full h-48 object-cover">
+            {% else %}
+              <div class="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-500">
+                <span>Gambar Tidak Tersedia</span>
+              </div>
+            {% endif %}
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-white">{{ article.title }}</h3>
+              <p class="mt-4 text-white">{{ article.content[:100] }}...</p>
+              <a 
+              class="bg-blue-900 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full hover:bg-white hover:text-blue-800 transition-colors duration-500 inline-flex items-center font-sans" 
+              href="{{ url_for('article_page', article_id=article.id) }}">
+              Baca Selengkapnya → 
+            </a>
+            
+           
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="flex justify-center mt-8">
+        {% if articles|length >= 9 %}  
+          <button id="load-more-btn" class="bg-blue-900 text-white py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors duration-300">
+            Temukan Artikel Lainnya
+          </button>
+        {% endif %}
+      </div>
+    </section>
+  </section>
+
+
+
+    <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <path fill="#ffffff" fill-opacity="1" d="M0,224L40,240C80,256,160,288,240,288C320,288,400,256,480,240C560,224,640,224,720,229.3C800,235,880,245,960,256C1040,267,1120,277,1200,256C1280,235,1360,181,1400,154.7L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path>
+    </svg>
+  
+  
+  <footer class="bg-blue-900 py-8">
+      <div class="max-w-md mx-auto text-center">
+          <!-- Logo atau ikon -->
+          <div class="flex justify-center mb-2">
+              <img src="{{url_for('static', filename='/img/Footer_Logo.png')}}" class="w-16 h-16" >
+          </div>
+          
+          <!-- Teks copyright -->
+          <p class="text-gray-400 text-sm mt-1">&copy; 2024 Divistant</p>
+      </div>
+  </footer>
+  </section>
+
+<script>
+  // static/js/load-more.js
+document.addEventListener('DOMContentLoaded', function() {
+    let currentPage = 1;
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const articlesContainer = document.querySelector('.grid');
+    
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            currentPage++;
+            
+            // Tampilkan loading state
+            loadMoreBtn.textContent = 'Memuat...';
+            loadMoreBtn.disabled = true;
+            
+            fetch(`/load-more-articles?page=${currentPage}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.articles && data.articles.length > 0) {
+                        // Render artikel baru
+                        data.articles.forEach(article => {
+                            const articleHtml = `
+                                <div class="bg-blue-900 hover:bg-blue-800 transition-colors duration-500 shadow-lg rounded-lg overflow-hidden">
+                                    ${article.images 
+                                        ? `<img src="/static/uploads/${article.images}" alt="Gambar Artikel" class="w-full h-48 object-cover">` 
+                                        : `<div class="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-500">
+                                            <span>Gambar Tidak Tersedia</span>
+                                           </div>`
+                                    }
+                                    <div class="p-6">
+                                        <h3 class="text-xl font-semibold text-white">${article.title}</h3>
+                                        <p class="mt-4 text-white">${article.content.substring(0, 100)}...</p>
+                                        <a href="/artikel/${article.id}" class="text-blue-900 font-semibold mt-4 inline-block border bg-white rounded-full p-3 hover:text-white hover:bg-blue-900 transition-colors duration-500">
+                                            Baca Selengkapnya →
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            articlesContainer.insertAdjacentHTML('beforeend', articleHtml);
+                        });
+                        
+                        // Reset button state
+                        loadMoreBtn.textContent = 'Temukan Artikel Lainnya';
+                        loadMoreBtn.disabled = false;
+                        
+                        // Sembunyikan tombol jika tidak ada artikel lagi
+                        if (!data.has_more) {
+                            loadMoreBtn.style.display = 'none';
+                        }
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadMoreBtn.textContent = 'Error! Coba lagi';
+                    loadMoreBtn.disabled = false;
+                });
+        });
+    }
+});
+</script>
+<script>
+  // Ambil tombol hamburger dan menu
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const menu = document.getElementById('menu');
+
+  // Tambahkan event listener untuk toggle menu
+  hamburgerBtn.addEventListener('click', () => {
+    menu.classList.toggle('hidden'); 
+  });
+</script>
+
+  
+</body>
+</html>
