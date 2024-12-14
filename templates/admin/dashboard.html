@@ -1,0 +1,15 @@
+{% extends 'admin/app.html' %}
+
+{% block content %}
+<div class="wrapper">
+    {% include "admin/layout_admin/sidebar.html" %}
+    <div class="main">
+        {% include "admin/layout_admin/navbar.html" %}
+        <main class="content">
+            {% block main_content %}{% endblock %}
+        </main>
+
+        {% include "admin/layout_admin/footer.html" %}
+    </div>
+</div>
+{% endblock %}

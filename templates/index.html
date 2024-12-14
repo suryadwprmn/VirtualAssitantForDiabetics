@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,300;1,500&display=swap" rel="stylesheet">
+    <title>Divistant - Sahabat Virtual untuk Hidup Lebih Sehat</title>
+</head>
+<body >
+ 
+    <div class="p-4 sm:p-6 md:p-10 lg:p-12 bg-blue-900">
+        {% include 'layout/navbar.html'%}
+      </div>
+
+    <div class="text-center bg-blue-900 p-4 sm:p-6 md:p-10 lg:p-12 ">
+        
+        <h5 class="font-bold text-center text-white font-sans text-base sm:text-lg md:text-xl mt-8">Divistant, Sahabat Virtual untuk Hidup Lebih Sehat Bersama Diabetes.</h5>
+    </div>
+
+    <section class="bg-blue-100 dark:bg-blue-900 py-8 sm:py-16 md:py-20 lg:py-24">
+        <div class="container mx-auto">
+            <header class="text-center">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold pb-10 sm:pb-16 md:pb-20 text-white">HALO DIVIS<span class="text-[#232947] rounded-full p-2 bg-white hover:bg-blue-900 hover:text-white">TER!</span></h2>
+                <p class="mt-4 mx-auto max-w-2xl text-lg sm:text-base font-sans text-white m-10">
+                    Selamat datang di Divistant! Kami adalah asisten virtual yang siap membantu Anda dalam menjaga kesehatan diabetes. Dengan berbagai informasi terpercaya dan fitur interaktif, Divistant hadir untuk mendukung perjalanan Anda menuju hidup yang lebih sehat dan terkontrol.
+                </p>
+                <button class="bg-white text-blue-800 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full hover:bg-blue-800 hover:text-white transition-colors duration-500 inline-flex items-center">
+                    download aplikasi 
+                </button>
+            </header>
+        </div>
+    </section>
+      
+<!-- CHATBOT -->
+<!-- Tombol Chat -->
+<div id="chatButton" class="fixed bottom-6 right-6 bg-cyan-600 rounded-full p-3 cursor-pointer border">
+    <img src="{{url_for('static', filename='/img/logo.png')}}" alt="Chat Icon" class="w-6 h-6">
+</div>
+
+<!-- Popup Chat -->
+<div id="chatPopup" class="fixed bottom-20 right-6 bg-white w-80 h-96 p-4 rounded-lg shadow-lg  flex flex-col justify-between">
+    <!-- Header Popup -->
+    <div class="flex items-center space-x-2 mb-4">
+        <div class="w-10 h-10 bg-cyan-600 rounded-full flex items-center justify-center">
+            <img src="{{url_for('static', filename='/img/logo.png')}}" alt="Chat Icon" class="w-6 h-6">
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold">Devi</h2>
+            <p class="text-gray-500 text-sm"> Generative AI Assistant</p>
+        </div>
+    </div>
+    
+    <!-- Konten Pesan -->
+    <div id="messageContainer" class="bg-cyan-600 p-3 rounded-lg mb-4 text-sm overflow-y-auto flex-grow text-white border border-red-900">
+        <p>Halo Devister!👋<br>
+           Perkenalkan aku Devi AI assistant yang akan menjawab pertanyaan kamu seputar diabetes dan tentang kesehatan anda
+        </p>
+    </div>
+
+    <!-- Input Pesan -->
+    <div class="flex items-center space-x-2">
+        <input type="text" id="userInput" placeholder="Ask a question..." class="w-full p-2 border rounded-lg">
+        <button id="sendButton" class="bg-white text-black p-2 rounded-lg">Send</button>
+    </div>
+</div>
+
+    <!-- artikel -->
+    <div class="bg-white dark:bg-gray-800" id="artikel">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="bg-white">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="bg-white dark:fill-blue-900">
+            </path>
+        </svg>
+    </div>
+    <h4 class="text-2xl sm:text-3xl font-bold text-center bg-white mb-6 sm:mb-9 mt-9">Ingin membaca kabar terbaru mengenai kesehatan?</h4>
+
+    <section class="bg-blue-900 border mx-4 sm:mx-8 md:mx-12 lg:mx-40 rounded-xl mb-60 mt-32" >
+        <div class="container mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12 lg:py-16 max-w-full lg:max-w-6xl">
+            <div class="flex flex-col md:flex-row gap-4 sm:gap-8 md:gap-12 items-center">
+                <!-- Image Column -->
+                <div class="w-full md:w-1/2">
+                    <img 
+                        src="{{url_for('static', filename='/img/diabetes.jpg')}}" 
+                        alt="Article Preview" 
+                        class="rounded-lg w-full object-cover shadow-md"
+                    >
+                </div>
+                
+                <!-- Content Column -->
+                <div class="w-full md:w-1/2 flex flex-col items-start space-y-4 sm:space-y-6 ">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white">Seputar Artikel</h2>
+                    <p class="text-white leading-relaxed text-sm sm:text-base lg:text-lg">
+                        Temukan berbagai artikel dan berita terbaru seputar kesehatan diabetes di sini. Kami menyediakan konten yang informatif dan mudah dipahami agar Anda selalu ter-update dengan informasi dan panduan kesehatan terpercaya. Mulai dari tips pengelolaan diabetes, gaya hidup sehat, hingga teknologi terbaru dalam dunia kesehatan, semua bisa Anda temukan di sini.
+                    </p>
+                    <a class="bg-white text-blue-900 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full hover:bg-blue-500 hover:text-white transition-colors duration-200 inline-flex items-center" href="/artikel">
+                        check it out! 
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    
+    <!-- Rekomendasi rumah sakit -->
+    <h2 class=" text-center font-sans text-xl sm:text-xs font-semibold">Devister takut untuk berpergian karna gejala yang di alami sering kambuh? </h2>
+    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold pb-10 sm:pb-16 md:pb-20 text-center ">JANGAN TAKUT LAGI!!</h2>
+    <section class="bg-blue-900 ">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#ffffff" fill-opacity="1" d="M0,224L40,240C80,256,160,288,240,288C320,288,400,256,480,240C560,224,640,224,720,229.3C800,235,880,245,960,256C1040,267,1120,277,1200,256C1280,235,1360,181,1400,154.7L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path>
+          </svg>
+        <div class="container mx-auto">
+
+            <header class="text-center">
+
+                <div class="max-w-6xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 text-white text-center">MEREKOMENDASIKAN RUMAH SAKIT TERDEKAT DENGAN ANDA!</h1>
+                    <p class="text-white mb-8 text-sm sm:text-base lg:text-lg text-center">
+                        Dapatkan rekomendasi rumah sakit terdekat untuk layanan kesehatan diabetes Anda. Kami bekerja sama dengan fasilitas kesehatan di sekitar Anda untuk membantu Anda menemukan layanan perawatan yang mudah diakses dan sesuai kebutuhan. Hanya dengan satu klik, temukan opsi perawatan yang dekat dan terpercaya untuk mendukung kesehatan Anda.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        {% for rs in rs_terdekat %}
+                        <div class="bg-white shadow-lg rounded-lg p-6">
+                            <img src="{{ url_for('static', filename='uploads/' + rs.gambar) }}" alt="{{ rs.rumah_sakit }}" class="mb-4 rounded-md block mx-auto">
+                            
+                            <!-- Nama Rumah Sakit -->
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">{{ rs.rumah_sakit }}</h3>
+                            
+                            <!-- Informasi Tambahan -->
+                            <p class="text-gray-600 text-sm sm:text-base">
+                                Rating: {{ rs.rating }} / 5 ⭐<br>
+                                <a href="{{ rs.maps }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded inline-block transition duration-300">
+                                    Lihat Maps
+                                </a>
+                            </p>
+                            
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    
+                    <div class="mt-8 text-center">
+                    
+                        <a href="/cek_rs" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg">Cek Rumah Sakit</a>
+                    
+                    </div>
+                
+                </div>
+                
+                
+            </header>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="bg-white">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="bg-white dark:fill-blue-900">
+                </path>
+            </svg>
+
+           <div class="bg-white text-center">
+                <p class="mx-auto max-w-2xl text-lg sm:text-base font-sans mb-20 bg-white pt-32 ">
+                    Butuh jawaban cepat atau dukungan langsung? Gunakan fitur chatbot kami, Divister! Chatbot ini siap menjawab pertanyaan seputar diabetes, memberikan tips kesehatan, dan membantu Anda mencari informasi yang Anda butuhkan, kapan pun dan di mana pun. Divister ada untuk mendampingi Anda dengan informasi yang tepat dan dukungan yang responsif.
+                </p>
+
+                <button class="bg-blue-900 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full hover:bg-blue-700 hover:text-white transition-colors duration-500 inline-flex items-center">
+                    Coba Chatbot
+                </button>
+            </div>
+        </div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#ffffff" fill-opacity="1" d="M0,224L40,240C80,256,160,288,240,288C320,288,400,256,480,240C560,224,640,224,720,229.3C800,235,880,245,960,256C1040,267,1120,277,1200,256C1280,235,1360,181,1400,154.7L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path>
+          </svg>
+
+        <footer class="bg-blue-900 py-8">
+            <div class="max-w-md mx-auto text-center">
+                <!-- Logo atau ikon -->
+                <div class="flex justify-center mb-2">
+                    <img src="{{url_for('static', filename='/img/Footer_Logo.png')}}" class="w-20 h-20"">
+                </div>
+                
+                <!-- Teks copyright -->
+                <p class="text-gray-400 text-sm mt-1">&copy; Made with 🍜&🍵</p>
+            </div>
+        </footer>
+        
+        
+    </section>
+    <style>
+        .wave-divider {
+          position: relative;
+          top: 0;
+          left: 0;
+          width: 100%;
+          overflow: hidden;
+          line-height: 0;
+        }
+      
+        .wave-divider svg {
+          position: relative;
+          display: block;
+          width: calc(100% + 1.3px);
+          height: 60px;
+        }
+      
+        @media (min-width: 768px) {
+          .wave-divider svg {
+            height: 150px;
+          }
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename='js/script.js')}}"></script>
+    <script>
+   
+
+        // Script untuk toggle popup
+        const chatButton = document.getElementById('chatButton');
+        const chatPopup = document.getElementById('chatPopup');
+        const sendButton = document.getElementById('sendButton');
+        const userInput = document.getElementById('userInput');
+        const messageContainer = document.getElementById('messageContainer');
+
+        chatButton.addEventListener('click', () => {
+            chatPopup.classList.toggle('hidden');
+        });
+
+        // Fungsi untuk mengirim pesan pengguna
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                // Tambahkan pesan pengguna
+                const userMessage = document.createElement('div');
+                userMessage.classList.add('bg-white', 'p-2', 'rounded-lg', 'mb-2', 'text-sm', 'text-right', 'text-black');
+                userMessage.innerHTML = `<strong>You</strong>: ${message}`;
+                messageContainer.appendChild(userMessage);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+                userInput.value = ''; // Kosongkan input setelah mengirim
+
+                // Panggil fungsi untuk respon bot
+                setTimeout(() => {
+                    botResponse(message);
+                }, 1000); // Delay 1 detik
+            }
+        }
+
+        // Fungsi untuk membuat respons bot
+        function botResponse(userMessage) {
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('bg-blue-900', 'p-2', 'rounded-lg', 'mb-2', 'text-sm', 'text-left', 'text-white');
+            
+            // Jawaban sederhana berdasarkan kata kunci
+            if (userMessage.toLowerCase().includes("halo")) {
+                botMessage.innerHTML = `<strong>Bot</strong>: Halo! Ada yang bisa saya bantu?`;
+            } else if (userMessage.toLowerCase().includes("terima kasih")) {
+                botMessage.innerHTML = `<strong>Bot</strong>: Sama-sama! Senang bisa membantu 😊`;
+            } else {
+                botMessage.innerHTML = `<strong>Bot</strong>: Shareloc ngab utiwi!`;
+            }
+            
+            messageContainer.appendChild(botMessage);
+            messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll ke pesan terbaru
+        }
+
+        // Event Listener untuk tombol kirim
+        sendButton.addEventListener('click', sendMessage);
+
+        // Tambahkan event listener untuk kirim dengan tombol Enter
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+
+    <script>
+        // Ambil tombol hamburger dan menu
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const menu = document.getElementById('menu');
+      
+        // Tambahkan event listener untuk toggle menu
+        hamburgerBtn.addEventListener('click', () => {
+          menu.classList.toggle('hidden'); 
+        });
+      </script>
+</body>
+
+</html>
