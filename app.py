@@ -12,6 +12,8 @@ import jwt
 from sqlalchemy.sql.expression import func
 
 from indobert import SentimentAnalyzer
+import nltk
+nltk.download('stopwords')
 # from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
 
 
@@ -52,7 +54,7 @@ def index():
 def sentimen_analisis():
     
     reviews = Sentimen.query.all()
-    return render_template('sentimen.html', reviews=reviews)
+    return render_template('/layout/sentimen.html', reviews=reviews)
 
 
 @app.route('/add_review', methods=['POST'])
