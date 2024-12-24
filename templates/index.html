@@ -33,40 +33,12 @@
                 </button>
             </header>
         </div>
+
+        <!-- CHATBOT -->
+{% include 'layout/chatbot.html'%}
     </section>
       
-<!-- CHATBOT -->
-<!-- Tombol Chat -->
-<div id="chatButton" class="fixed bottom-6 right-6 bg-cyan-600 rounded-full p-3 cursor-pointer border">
-    <img src="{{url_for('static', filename='/img/logo.png')}}" alt="Chat Icon" class="w-6 h-6">
-</div>
 
-<!-- Popup Chat -->
-<div id="chatPopup" class="fixed bottom-20 right-6 bg-white w-80 h-96 p-4 rounded-lg shadow-lg  flex flex-col justify-between">
-    <!-- Header Popup -->
-    <div class="flex items-center space-x-2 mb-4">
-        <div class="w-10 h-10 bg-cyan-600 rounded-full flex items-center justify-center">
-            <img src="{{url_for('static', filename='/img/logo.png')}}" alt="Chat Icon" class="w-6 h-6">
-        </div>
-        <div>
-            <h2 class="text-lg font-semibold">Devi</h2>
-            <p class="text-gray-500 text-sm"> Generative AI Assistant</p>
-        </div>
-    </div>
-    
-    <!-- Konten Pesan -->
-    <div id="messageContainer" class="bg-cyan-600 p-3 rounded-lg mb-4 text-sm overflow-y-auto flex-grow text-white border border-red-900">
-        <p>Halo Devister!👋<br>
-           Perkenalkan aku Devi AI assistant yang akan menjawab pertanyaan kamu seputar diabetes dan tentang kesehatan anda
-        </p>
-    </div>
-
-    <!-- Input Pesan -->
-    <div class="flex items-center space-x-2">
-        <input type="text" id="userInput" placeholder="Ask a question..." class="w-full p-2 border rounded-lg">
-        <button id="sendButton" class="bg-white text-black p-2 rounded-lg">Send</button>
-    </div>
-</div>
 
     <!-- artikel -->
     <div class="bg-white dark:bg-gray-800" id="artikel">
@@ -218,65 +190,7 @@
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="{{url_for('static', filename='js/script.js')}}"></script>
-    <script>
-   
 
-        // Script untuk toggle popup
-        const chatButton = document.getElementById('chatButton');
-        const chatPopup = document.getElementById('chatPopup');
-        const sendButton = document.getElementById('sendButton');
-        const userInput = document.getElementById('userInput');
-        const messageContainer = document.getElementById('messageContainer');
-
-        chatButton.addEventListener('click', () => {
-            chatPopup.classList.toggle('hidden');
-        });
-
-        // Fungsi untuk mengirim pesan pengguna
-        function sendMessage() {
-            const message = userInput.value.trim();
-            if (message) {
-                // Tambahkan pesan pengguna
-                const userMessage = document.createElement('div');
-                userMessage.classList.add('bg-white', 'p-2', 'rounded-lg', 'mb-2', 'text-sm', 'text-right', 'text-black');
-                userMessage.innerHTML = `<strong>You</strong>: ${message}`;
-                messageContainer.appendChild(userMessage);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-                userInput.value = ''; // Kosongkan input setelah mengirim
-
-                // Panggil fungsi untuk respon bot
-                setTimeout(() => {
-                    botResponse(message);
-                }, 1000); // Delay 1 detik
-            }
-        }
-
-        // Fungsi untuk membuat respons bot
-        function botResponse(userMessage) {
-            const botMessage = document.createElement('div');
-            botMessage.classList.add('bg-blue-900', 'p-2', 'rounded-lg', 'mb-2', 'text-sm', 'text-left', 'text-white');
-            
-            // Jawaban sederhana berdasarkan kata kunci
-            if (userMessage.toLowerCase().includes("halo")) {
-                botMessage.innerHTML = `<strong>Bot</strong>: Halo! Ada yang bisa saya bantu?`;
-            } else if (userMessage.toLowerCase().includes("terima kasih")) {
-                botMessage.innerHTML = `<strong>Bot</strong>: Sama-sama! Senang bisa membantu 😊`;
-            } else {
-                botMessage.innerHTML = `<strong>Bot</strong>: Shareloc ngab utiwi!`;
-            }
-            
-            messageContainer.appendChild(botMessage);
-            messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll ke pesan terbaru
-        }
-
-        // Event Listener untuk tombol kirim
-        sendButton.addEventListener('click', sendMessage);
-
-        // Tambahkan event listener untuk kirim dengan tombol Enter
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-    </script>
 
     <script>
         // Ambil tombol hamburger dan menu
