@@ -14,6 +14,17 @@ from sqlalchemy.sql.expression import func
 from indobert import SentimentAnalyzer
 # from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
 
+###### CHATBOT####### 
+from flask import Flask, request, jsonify, render_template
+from model.models import initialize_llm, initialize_embeddings, initialize_vectorstore, create_rag_chain
+from langchain_community.document_loaders import PyPDFLoader
+import os
+
+
+
+GROQ_API_KEY = "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"
+PDF_FILE_PATH = "data/datasetV7.pdf"
+
 
 ### Menjalankan Flask
 app = Flask(__name__)
@@ -22,7 +33,59 @@ app.secret_key = 'rahasia'
 db.init_app(app)
 CORS(app)
 
+#CHATBOT INTEGRATIONS
+def initialize_rag_model():
+    """Initialize the RAG model and vector store retriever."""
+    try:
+        # Initialize LLM and embeddings
+        llm = initialize_llm(GROQ_API_KEY)
+        embeddings = initialize_embeddings()
 
+        # Load and process PDF documents
+        pdf_loader = PyPDFLoader(PDF_FILE_PATH)
+        documents = pdf_loader.load()
+
+        # Initialize vector store retriever
+        retriever = initialize_vectorstore(documents, embeddings)
+        app.config['llm'] = llm
+        app.config['retriever'] = retriever
+        print("Model and retriever initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing model: {e}")
+        raise e
+
+@app.before_request
+def setup_model():
+    """Ensure model is initialized before the first request."""
+    if 'llm' not in app.config or 'retriever' not in app.config:
+        initialize_rag_model()
+
+@app.route('/cc')
+def cc():
+    return render_template('layout/chatbot.html')
+
+@app.route('/get', methods=['GET'])
+def get_response():
+    message = request.args.get('msg')
+
+    # Check if message is present
+    if not message:
+        return "No input received."
+
+    # Ensure model and retriever are initialized
+    llm = app.config.get('llm')
+    retriever = app.config.get('retriever')
+    
+    if not llm or not retriever:
+        return "Model or retriever is not initialized."
+
+    try:
+        # Create the RAG chain with the retriever and llm
+        rag_chain = create_rag_chain(retriever, llm)
+        response = rag_chain.invoke({"input": message})
+        return response['answer']
+    except Exception as e:
+        return f"Error: {e}"
 
 #sentimen
 model_indobert = 'model'
