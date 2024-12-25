@@ -77,12 +77,12 @@ class Pengguna(db.Model):
     )
     phone = db.Column(db.String(15))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    # Relationship to CatatanGulaDarah (one to many)
+    catatan_gula_darah = db.relationship('CatatanGulaDarah', back_populates='pengguna', lazy=True)
     
-     # Relationship to CatatanGulaDarah (one to many)
-    catatan_gula_darah = db.relationship('CatatanGulaDarah', backref='pengguna_catatan', lazy=True)
-    
-    # Relationship to HbA1c (one to many) with a different backref name to avoid conflict
-    hba1c_records = db.relationship('HbA1c', backref='pengguna_hba1c', lazy=True)
+    # Relationship to HbA1c (one to many)
+    hba1c_records = db.relationship('HbA1c', back_populates='pengguna', lazy=True)
 
     def __init__(self, name, email, password, gender, diabetes_category, phone=None):
         self.name = name
@@ -91,6 +91,7 @@ class Pengguna(db.Model):
         self.gender = gender
         self.diabetes_category = diabetes_category
         self.phone = phone
+
 
     # Function to verify password
     def verify_password(self, password):
@@ -106,7 +107,7 @@ class CatatanGulaDarah(db.Model):
     gula_darah = db.Column(db.Float, nullable=False)
 
     # Relationship to Pengguna
-    pengguna = db.relationship('Pengguna', backref=db.backref('catatan_user', lazy=True))
+    pengguna = db.relationship('Pengguna', back_populates='catatan_gula_darah')
 
     def __init__(self, pengguna_id, tanggal, waktu, gula_darah):
         self.pengguna_id = pengguna_id
@@ -124,20 +125,26 @@ class HbA1c(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     # Relationship to Pengguna
-    pengguna = db.relationship('Pengguna', backref=db.backref('hba1c_user', lazy=True))
+    pengguna = db.relationship('Pengguna', back_populates='hba1c_records')
 
     def __init__(self, pengguna_id, hba1c):
         self.pengguna_id = pengguna_id
         self.hba1c = hba1c
-        
+       
 class Sentimen(db.Model):
     __tablename__ = 'sentimen'
     
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('pengguna.id'), nullable=False)
     komentar = db.Column(db.String(255), nullable=False)
     hasil = db.Column(db.String(55), nullable=False)
     
-    def __init__(self,komentar, hasil):
-        self.komentar = komentar    
+    # Relationship to Pengguna
+    pengguna = db.relationship('Pengguna', backref=db.backref('sentimen_reviews', lazy=True))
+    
+    # Tambahkan konstruktor
+    def __init__(self, user_id, komentar, hasil):
+        self.user_id = user_id
+        self.komentar = komentar
         self.hasil = hasil
 

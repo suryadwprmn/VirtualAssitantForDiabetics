@@ -4,7 +4,6 @@ from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah, HbA1c,Sentimen
-
 from functools import wraps
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -21,8 +20,6 @@ app.config.from_object(Config)
 app.secret_key = 'rahasia' 
 db.init_app(app)
 CORS(app)
-
-
 
 #sentimen
 model_indobert = 'model'
@@ -55,30 +52,30 @@ def sentimen_analisis():
     return render_template('sentimen.html', reviews=reviews)
 
 
-@app.route('/add_review', methods=['POST'])
-def add_review():
-    data = request.json
-    review_text = data['text']
+# @app.route('/add_review', methods=['POST'])
+# def add_review():
+#     data = request.json
+#     review_text = data['text']
     
-    # Predict sentiment before saving
-    predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
+#     # Predict sentiment before saving
+#     predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
     
-    if predicted_class == 0:
-        sentiment = "Positif"
-    elif predicted_class == 1:
-        sentiment = "Netral"
-    else:
-        sentiment = "Negatif"
+#     if predicted_class == 0:
+#         sentiment = "Positif"
+#     elif predicted_class == 1:
+#         sentiment = "Netral"
+#     else:
+#         sentiment = "Negatif"
     
-    # Create a new Sentimen object and save to database
-    new_review = Sentimen(komentar=review_text, hasil=sentiment)
-    db.session.add(new_review)
-    db.session.commit()
+#     # Create a new Sentimen object and save to database
+#     new_review = Sentimen(komentar=review_text, hasil=sentiment)
+#     db.session.add(new_review)
+#     db.session.commit()
     
-    return jsonify({
-        "text": review_text,
-        "sentiment": sentiment
-    })
+#     return jsonify({
+#         "text": review_text,
+#         "sentiment": sentiment
+#     })
 
 
 @app.route('/artikel')
@@ -151,13 +148,28 @@ def cek_rs():
         if user.role == 'admin':
             return redirect(url_for('admin_dashboard'))
 
-    # Ambil parameter halaman dari URL (default ke halaman 1)
+    # Ambil parameter halaman dan pencarian dari URL
     page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('search', '').strip()
     per_page = 20  # Total item per halaman
 
-    # Query rumah sakit dengan pagination
-    pagination = RumahSakit.query.paginate(page=page, per_page=per_page)
-    rs_list = pagination.items
+    # Query dasar untuk rumah sakit
+    query = RumahSakit.query
+
+    # Tambahkan filter pencarian jika ada query
+    if search_query:
+        # Gunakan fungsi filter dengan ilike untuk pencarian case-insensitive
+        query = query.filter(RumahSakit.rumah_sakit.ilike(f'%{search_query}%'))
+
+    # Lakukan pagination
+    try:
+        pagination = query.paginate(page=page, per_page=per_page)
+        rs_list = pagination.items
+    except Exception as e:
+        # Tambahkan logging atau print error untuk debugging
+        print(f"Pagination Error: {e}")
+        pagination = None
+        rs_list = []
 
     return render_template('Hospital.html', rs_list=rs_list, pagination=pagination)
 
@@ -775,6 +787,35 @@ def get_all_articles():
     ]
     return jsonify({'articles': articles})
 
+@app.route('/api/review', methods=['POST'])
+@token_required
+def add_review(current_user):  # current_user diambil dari token
+    data = request.json
+    review_text = data.get('text')
+    
+    # Validasi user
+    if not current_user:
+        return jsonify({"error": "Invalid user token"}), 401
+
+    # Prediksi sentimen
+    predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
+    
+    # Tentukan hasil sentimen
+    if predicted_class == 0:
+        sentiment = "Positif"
+    elif predicted_class == 1:
+        sentiment = "Netral"
+    else:
+        sentiment = "Negatif"
+    
+    # Simpan data ke tabel Sentimen
+    new_review = Sentimen(komentar=review_text, hasil=sentiment, user_id=current_user.id)
+    db.session.add(new_review)
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Review successfully added.",
+    }), 201
 
 ##################### End API #####################
 
