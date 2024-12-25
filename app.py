@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for,request,redirect,flash,abort,session,jsonify
-from config import Config,db
+from config import Config,db,mail
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,9 +9,17 @@ from flask_cors import CORS
 from datetime import datetime, timedelta
 import jwt
 from sqlalchemy.sql.expression import func
-
 from indobert import SentimentAnalyzer
+from flask_mail import Message
 # from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
+
+###### CHATBOT####### 
+from model.models import initialize_llm, initialize_embeddings, initialize_vectorstore, create_rag_chain
+from langchain_community.document_loaders import PyPDFLoader
+import os
+
+GROQ_API_KEY = "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"
+PDF_FILE_PATH = "data/datasetV7.pdf"
 
 
 ### Menjalankan Flask
@@ -19,7 +27,62 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = 'rahasia' 
 db.init_app(app)
+mail.init_app(app)
 CORS(app)
+
+#CHATBOT INTEGRATIONS
+def initialize_rag_model():
+    """Initialize the RAG model and vector store retriever."""
+    try:
+        # Initialize LLM and embeddings
+        llm = initialize_llm(GROQ_API_KEY)
+        embeddings = initialize_embeddings()
+
+        # Load and process PDF documents
+        pdf_loader = PyPDFLoader(PDF_FILE_PATH)
+        documents = pdf_loader.load()
+
+        # Initialize vector store retriever
+        retriever = initialize_vectorstore(documents, embeddings)
+        app.config['llm'] = llm
+        app.config['retriever'] = retriever
+        print("Model and retriever initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing model: {e}")
+        raise e
+
+@app.before_request
+def setup_model():
+    """Ensure model is initialized before the first request."""
+    if 'llm' not in app.config or 'retriever' not in app.config:
+        initialize_rag_model()
+
+@app.route('/cc')
+def cc():
+    return render_template('layout/chatbot.html')
+
+@app.route('/get', methods=['GET'])
+def get_response():
+    message = request.args.get('msg')
+
+    # Check if message is present
+    if not message:
+        return "No input received."
+
+    # Ensure model and retriever are initialized
+    llm = app.config.get('llm')
+    retriever = app.config.get('retriever')
+    
+    if not llm or not retriever:
+        return "Model or retriever is not initialized."
+
+    try:
+        # Create the RAG chain with the retriever and llm
+        rag_chain = create_rag_chain(retriever, llm)
+        response = rag_chain.invoke({"input": message})
+        return response['answer']
+    except Exception as e:
+        return f"Error: {e}"
 
 #sentimen
 model_indobert = 'model'
@@ -52,30 +115,30 @@ def sentimen_analisis():
     return render_template('sentimen.html', reviews=reviews)
 
 
-# @app.route('/add_review', methods=['POST'])
-# def add_review():
-#     data = request.json
-#     review_text = data['text']
+@app.route('/add_review', methods=['POST'])
+def add_review():
+    data = request.json
+    review_text = data['text']
     
-#     # Predict sentiment before saving
-#     predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
+    # Predict sentiment before saving
+    predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
     
-#     if predicted_class == 0:
-#         sentiment = "Positif"
-#     elif predicted_class == 1:
-#         sentiment = "Netral"
-#     else:
-#         sentiment = "Negatif"
+    if predicted_class == 0:
+        sentiment = "Positif"
+    elif predicted_class == 1:
+        sentiment = "Netral"
+    else:
+        sentiment = "Negatif"
     
-#     # Create a new Sentimen object and save to database
-#     new_review = Sentimen(komentar=review_text, hasil=sentiment)
-#     db.session.add(new_review)
-#     db.session.commit()
+    # Create a new Sentimen object and save to database
+    new_review = Sentimen(komentar=review_text, hasil=sentiment)
+    db.session.add(new_review)
+    db.session.commit()
     
-#     return jsonify({
-#         "text": review_text,
-#         "sentiment": sentiment
-#     })
+    return jsonify({
+        "text": review_text,
+        "sentiment": sentiment
+    })
 
 
 @app.route('/artikel')
@@ -787,37 +850,111 @@ def get_all_articles():
     ]
     return jsonify({'articles': articles})
 
-@app.route('/api/review', methods=['POST'])
-@token_required
-def add_review(current_user):  # current_user diambil dari token
-    data = request.json
-    review_text = data.get('text')
+# @app.route('/api/review', methods=['POST'])
+# @token_required
+# def add_review_api(current_user):  # current_user diambil dari token
+#     data = request.json
+#     review_text = data.get('text')
     
-    # Validasi user
-    if not current_user:
-        return jsonify({"error": "Invalid user token"}), 401
+#     # Validasi user
+#     if not current_user:
+#         return jsonify({"error": "Invalid user token"}), 401
 
-    # Prediksi sentimen
-    predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
+#     # Prediksi sentimen
+#     predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
     
-    # Tentukan hasil sentimen
-    if predicted_class == 0:
-        sentiment = "Positif"
-    elif predicted_class == 1:
-        sentiment = "Netral"
-    else:
-        sentiment = "Negatif"
+#     # Tentukan hasil sentimen
+#     if predicted_class == 0:
+#         sentiment = "Positif"
+#     elif predicted_class == 1:
+#         sentiment = "Netral"
+#     else:
+#         sentiment = "Negatif"
     
-    # Simpan data ke tabel Sentimen
-    new_review = Sentimen(komentar=review_text, hasil=sentiment, user_id=current_user.id)
-    db.session.add(new_review)
-    db.session.commit()
+#     # Simpan data ke tabel Sentimen
+#     new_review = Sentimen(komentar=review_text, hasil=sentiment, user_id=current_user.id)
+#     db.session.add(new_review)
+#     db.session.commit()
     
-    return jsonify({
-        "message": "Review successfully added.",
-    }), 201
+#     return jsonify({
+#         "message": "Review successfully added.",
+#     }), 201
 
 ##################### End API #####################
+
+##################### Password Reset ####################
+
+# Route untuk menampilkan form request reset password
+@app.route('/forgot-password', methods=['GET'])
+def forgot_password():
+    return render_template('forgot_password.html')
+
+# Route untuk memproses request reset password
+@app.route('/request-reset-password', methods=['POST'])
+def request_reset_password():
+    email = request.json.get('email')
+    
+    if not email:
+        return jsonify({'message': 'Email harus diisi'}), 400
+
+    # Cek user di database
+    user = Pengguna.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'message': 'Email tidak ditemukan'}), 404
+
+    # Token reset password dan email
+    reset_token = jwt.encode({
+        'user_id': user.id,
+        'exp': datetime.utcnow() + timedelta(hours=1)
+    }, app.config['SECRET_KEY'], algorithm='HS256')
+
+    msg = Message('Reset Password Request', recipients=[user.email])
+    msg.body = f'Klik link berikut untuk reset password: {url_for("reset_password", token=reset_token, _external=True)}'
+
+    try:
+        mail.send(msg)
+    except Exception as email_error:
+        return jsonify({'message': f'Error mengirim email: {str(email_error)}'}), 500
+
+    return jsonify({'message': 'Email reset password telah dikirim'}), 200
+
+
+# Route untuk menampilkan dan memproses form reset password
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        # Verifikasi token
+        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        user = Pengguna.query.get(payload['user_id'])
+
+        if not user:
+            flash('Link reset password tidak valid', 'error')
+            return redirect(url_for('login'))
+
+        if request.method == 'POST':
+            new_password = request.form.get('new_password')
+            if not new_password:
+                flash('Password baru harus diisi', 'error')
+                return redirect(url_for('reset_password', token=token))
+
+            # Update password
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+
+            flash('Password berhasil direset. Silakan login dengan password baru.', 'success')
+            return redirect(url_for('index'))  
+
+        # Jika method GET, tampilkan form reset password
+        return render_template('reset_password.html', token=token)
+
+    except jwt.ExpiredSignatureError:
+        flash('Link reset password telah kadaluarsa', 'error')
+        return redirect(url_for('forgot_password'))
+    except jwt.InvalidTokenError:
+        flash('Link reset password tidak valid', 'error')
+        return redirect(url_for('forgot_password'))
+
+##################### End Password Reset ####################
 
 ##################### Error Handler #####################
 # Error handler untuk 404 - Page Not Found

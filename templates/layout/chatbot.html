@@ -1,0 +1,107 @@
+<!-- CHATBOT -->
+<!-- Tombol Chat -->
+<div id="chatButton" class="fixed bottom-6 right-6 bg-cyan-600 rounded-full p-4 cursor-pointer border border-gray-300 shadow-lg">
+    <img src="{{url_for('static', filename='/img/logo.png')}}" alt="Chat Icon" class="w-8 h-8">
+</div>
+
+<!-- Popup Chat -->
+<div id="chatPopup" class="hidden fixed bottom-20 right-6 bg-white w-80 h-96 p-4 rounded-lg shadow-lg flex flex-col">
+    <!-- Header Popup -->
+     
+    <div class="flex items-center space-x-3 border-b pb-2 mb-4">
+        <div class="w-10 h-10 bg-cyan-600 rounded-full flex items-center justify-center">
+            <img src="{{url_for('static', filename='/img/logo.png')}}" alt="Chat Icon" class="w-6 h-6">
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-700">Devi</h2>
+            <p class="text-gray-500 text-sm">Generative AI Assistant</p>
+        </div>
+        <button onclick="closeChat()" class="ml-auto text-gray-500 hover:text-gray-700">&times;</button>
+    </div>
+
+    <!-- Konten Pesan -->
+    <div id="messageContainer" class="flex-grow overflow-y-auto mb-4">
+        <div id="chatBody" class="space-y-2">
+            <div class="chat-message bot bg-cyan-100 p-2 rounded-lg text-sm">
+                Selamat datang! Ada yang bisa dibantu?
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Pesan -->
+    <div class="flex items-center border-t pt-2">
+        <textarea id="messageInput" placeholder="Ask a question..." class="flex-grow p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-cyan-600 text-sm"></textarea>
+        <button onclick="sendMessage()" class="ml-2 p-2 bg-cyan-600 text-white rounded-full hover:bg-cyan-700">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send" viewBox="0 0 24 24">
+                <path d="M22 2L11 13 2 22l4-10L22 2z"></path>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Show and hide chat popup
+    const chatButton = document.getElementById('chatButton');
+    const chatPopup = document.getElementById('chatPopup');
+
+    chatButton.addEventListener('click', () => {
+        chatPopup.classList.toggle('hidden');
+    });
+
+    function closeChat() {
+        chatPopup.classList.add('hidden');
+    }
+
+    function addMessage(text, type) {
+        const chatBody = document.getElementById('chatBody');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('chat-message', type);
+        messageDiv.classList.add(type === 'user' ? 'bg-gray-200' : 'bg-cyan-100', 'p-2', 'rounded-lg', 'text-sm');
+        messageDiv.textContent = text;
+        chatBody.appendChild(messageDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        const chatBody = document.getElementById('chatBody');
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('typing-indicator', 'bg-gray-200', 'p-2', 'rounded-lg', 'text-sm');
+        typingDiv.textContent = 'Typing...';
+        chatBody.appendChild(typingDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        return typingDiv;
+    }
+
+    function removeTypingIndicator(typingDiv) {
+        typingDiv.remove();
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        addMessage(message, 'user');
+        messageInput.value = '';
+
+        const typingDiv = showTypingIndicator();
+
+        fetch('/get?msg=' + encodeURIComponent(message))
+            .then(response => response.text())
+            .then(data => {
+                removeTypingIndicator(typingDiv);
+                addMessage(data, 'bot');
+            })
+            .catch(error => {
+                removeTypingIndicator(typingDiv);
+                addMessage('Error: ' + error.message, 'bot');
+            });
+    }
+
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+</script>

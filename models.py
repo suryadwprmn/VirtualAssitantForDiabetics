@@ -70,7 +70,7 @@ class Pengguna(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=False)  # This will store the hashed password
+    password = db.Column(db.String(255), nullable=False)  
     gender = db.Column(db.Enum('Laki-laki', 'Perempuan'), nullable=False)
     diabetes_category = db.Column(
         db.Enum('Non Diabetes', 'Diabetes 1', 'Diabetes 2'), nullable=False
@@ -133,18 +133,12 @@ class HbA1c(db.Model):
        
 class Sentimen(db.Model):
     __tablename__ = 'sentimen'
-    
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('pengguna.id'), nullable=False)
     komentar = db.Column(db.String(255), nullable=False)
     hasil = db.Column(db.String(55), nullable=False)
-    
-    # Relationship to Pengguna
-    pengguna = db.relationship('Pengguna', backref=db.backref('sentimen_reviews', lazy=True))
-    
+        
     # Tambahkan konstruktor
-    def __init__(self, user_id, komentar, hasil):
-        self.user_id = user_id
+    def __init__(self, komentar, hasil):
         self.komentar = komentar
         self.hasil = hasil
 
