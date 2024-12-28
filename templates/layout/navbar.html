@@ -12,7 +12,7 @@
   </button>
 
   <!-- Menu -->
-  <ul id="menu" class="hidden md:flex md:flex-row md:space-x-8 flex-col space-y-2 md:space-y-0 absolute right-0 left-0 top-full bg-white shadow-lg rounded-md p-4 md:p-0 md:shadow-none md:static">
+  <ul id="menu" class="hidden md:flex md:flex-row md:space-x-8 flex-col space-y-2 md:space-y-0 absolute right-0 left-10 top-full bg-white shadow-lg rounded-md p-4 md:p-0 md:shadow-none md:static mr-40">
     <li>
       <a href="{{ url_for('index') }}" class="text-black no-underline px-4 py-2 font-normal hover:text-gray-500 transition duration-300">
         Beranda
@@ -28,11 +28,7 @@
         Rekomendasi
       </a>
     </li>
-    <li>
-      <a href="{{ url_for('sentimen_analisis') }}" class="text-black no-underline px-4 py-2 font-normal hover:text-gray-500 transition duration-300">
-        Ulasan
-      </a>
-    </li>
+
   </ul>
 </nav>
 

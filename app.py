@@ -110,7 +110,7 @@ def index():
 def sentimen_analisis():
     
     reviews = Sentimen.query.all()
-    return render_template('sentimen.html', reviews=reviews)
+    return render_template('/layout/sentimen.html', reviews=reviews)
 
 
 @app.route('/add_review', methods=['POST'])
