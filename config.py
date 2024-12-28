@@ -2,7 +2,7 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 from flask_mail import Mail
-
+    
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 db = SQLAlchemy()
 mail = Mail()

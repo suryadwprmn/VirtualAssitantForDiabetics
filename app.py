@@ -16,8 +16,6 @@ from flask_mail import Message
 ###### CHATBOT####### 
 from model.models import initialize_llm, initialize_embeddings, initialize_vectorstore, create_rag_chain
 from langchain_community.document_loaders import PyPDFLoader
-import os
-
 GROQ_API_KEY = "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"
 PDF_FILE_PATH = "data/datasetV7.pdf"
 
@@ -850,77 +848,41 @@ def get_all_articles():
     ]
     return jsonify({'articles': articles})
 
-# @app.route('/api/review', methods=['POST'])
-# @token_required
-# def add_review_api(current_user):  # current_user diambil dari token
-#     data = request.json
-#     review_text = data.get('text')
-    
-#     # Validasi user
-#     if not current_user:
-#         return jsonify({"error": "Invalid user token"}), 401
-
-#     # Prediksi sentimen
-#     predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
-    
-#     # Tentukan hasil sentimen
-#     if predicted_class == 0:
-#         sentiment = "Positif"
-#     elif predicted_class == 1:
-#         sentiment = "Netral"
-#     else:
-#         sentiment = "Negatif"
-    
-#     # Simpan data ke tabel Sentimen
-#     new_review = Sentimen(komentar=review_text, hasil=sentiment, user_id=current_user.id)
-#     db.session.add(new_review)
-#     db.session.commit()
-    
-#     return jsonify({
-#         "message": "Review successfully added.",
-#     }), 201
-
 ##################### End API #####################
 
 ##################### Password Reset ####################
 
 # Route untuk menampilkan form request reset password
-@app.route('/forgot-password', methods=['GET'])
-def forgot_password():
-    return render_template('forgot_password.html')
-
-# Route untuk memproses request reset password
-@app.route('/request-reset-password', methods=['POST'])
+@app.route('/api/request-reset-password', methods=['POST'])
 def request_reset_password():
     email = request.json.get('email')
-    
-    if not email:
-        return jsonify({'message': 'Email harus diisi'}), 400
 
-    # Cek user di database
+    if not email:
+        return jsonify({'error': 'Email harus diisi'}), 400
+
     user = Pengguna.query.filter_by(email=email).first()
     if not user:
-        return jsonify({'message': 'Email tidak ditemukan'}), 404
+        return jsonify({'error': 'Email tidak ditemukan'}), 404
 
-    # Token reset password dan email
     reset_token = jwt.encode({
         'user_id': user.id,
         'exp': datetime.utcnow() + timedelta(hours=1)
     }, app.config['SECRET_KEY'], algorithm='HS256')
 
+    reset_link = url_for('reset_password', token=reset_token, _external=True)
     msg = Message('Reset Password Request', recipients=[user.email])
-    msg.body = f'Klik link berikut untuk reset password: {url_for("reset_password", token=reset_token, _external=True)}'
+    msg.body = f'Klik link berikut untuk reset password: {reset_link}'
 
     try:
         mail.send(msg)
-    except Exception as email_error:
-        return jsonify({'message': f'Error mengirim email: {str(email_error)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Gagal mengirim email: {str(e)}'}), 500
 
     return jsonify({'message': 'Email reset password telah dikirim'}), 200
 
 
 # Route untuk menampilkan dan memproses form reset password
-@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])  
 def reset_password(token):
     try:
         # Verifikasi token
