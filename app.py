@@ -881,6 +881,40 @@ def request_reset_password():
     return jsonify({'message': 'Email reset password telah dikirim'}), 200
 
 
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.get_json()
+        
+        if not data or 'message' not in data:
+            return jsonify({
+                'error': 'No message provided',
+                'status': 400
+            }), 400
+
+        # Initialize components
+        llm = initialize_llm(GROQ_API_KEY)
+        embeddings = initialize_embeddings()
+        loader = PyPDFLoader(PDF_FILE_PATH)
+        documents = loader.load()
+        retriever = initialize_vectorstore(documents, embeddings)
+
+        # Create RAG chain and get response
+        rag_chain = create_rag_chain(retriever, llm)
+        response = rag_chain.invoke({"input": data['message']})
+
+        return jsonify({
+            'response': response['answer'],
+            'status': 200
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'status': 500
+        }), 500
+
+
 # Route untuk menampilkan dan memproses form reset password
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])  
 def reset_password(token):
