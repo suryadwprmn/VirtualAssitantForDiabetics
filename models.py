@@ -141,4 +141,14 @@ class Sentimen(db.Model):
     def __init__(self, komentar, hasil):
         self.komentar = komentar
         self.hasil = hasil
+        
+class Makanan(db.Model):
+    __tablename__ = 'makanan'
+    id = db.Column(db.Integer, primary_key=True)
+    nama_makanan = db.Column(db.String(255), nullable=False)
+    gula = db.Column(db.Numeric(10, 3), nullable=False)
+    
+    def __init__(self, nama_makanan, gula):
+        self.nama_makanan = nama_makanan
+        self.gula = gula
 

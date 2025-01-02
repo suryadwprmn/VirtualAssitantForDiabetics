@@ -3,7 +3,7 @@ from config import Config,db,mail
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah, HbA1c,Sentimen
+from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah, HbA1c,Sentimen,Makanan
 from functools import wraps
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -18,7 +18,6 @@ from model.models import initialize_llm, initialize_embeddings, initialize_vecto
 from langchain_community.document_loaders import PyPDFLoader
 GROQ_API_KEY = "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"
 PDF_FILE_PATH = "data/datasetV7.pdf"
-
 
 ### Menjalankan Flask
 app = Flask(__name__)
@@ -848,38 +847,41 @@ def get_all_articles():
     ]
     return jsonify({'articles': articles})
 
-##################### End API #####################
+@app.route('/api/search_food', methods=['GET'])
+def search_food():
+    # Ambil query parameter dari URL
+    query = request.args.get('query', '')  
+    
+    # Query makanan berdasarkan nama yang mengandung kata kunci
+    makanan_list = Makanan.query.filter(Makanan.nama_makanan.ilike(f'%{query}%')).all()
 
-##################### Password Reset ####################
+    # Ubah hasil query menjadi list of dictionaries untuk dikembalikan dalam JSON
+    results = {
+        'data': [{
+            'nama_makanan': makanan.nama_makanan,
+            'gula': str(makanan.gula) 
+        } for makanan in makanan_list]
+    }
 
-# Route untuk menampilkan form request reset password
-@app.route('/api/request-reset-password', methods=['POST'])
-def request_reset_password():
-    email = request.json.get('email')
+    # Kembalikan hasil pencarian dalam format JSON
+    return jsonify(results)
+@app.route('/api/food/<int:id>', methods=['GET'])
+def get_food_by_id(id):
+    # Mencari makanan berdasarkan id
+    makanan = Makanan.query.get(id)
+    
+    # Jika makanan tidak ditemukan, kembalikan error 404
+    if makanan is None:
+        return jsonify({"error": "Makanan tidak ditemukan"}), 404
+    
+    # Jika ditemukan, kembalikan data makanan dalam format JSON
+    result = {
+        'id': makanan.id,
+        'nama_makanan': makanan.nama_makanan,
+        'gula': str(makanan.gula)
+    }
 
-    if not email:
-        return jsonify({'error': 'Email harus diisi'}), 400
-
-    user = Pengguna.query.filter_by(email=email).first()
-    if not user:
-        return jsonify({'error': 'Email tidak ditemukan'}), 404
-
-    reset_token = jwt.encode({
-        'user_id': user.id,
-        'exp': datetime.utcnow() + timedelta(hours=1)
-    }, app.config['SECRET_KEY'], algorithm='HS256')
-
-    reset_link = url_for('reset_password', token=reset_token, _external=True)
-    msg = Message('Reset Password Request', recipients=[user.email])
-    msg.body = f'Klik link berikut untuk reset password: {reset_link}'
-
-    try:
-        mail.send(msg)
-    except Exception as e:
-        return jsonify({'error': f'Gagal mengirim email: {str(e)}'}), 500
-
-    return jsonify({'message': 'Email reset password telah dikirim'}), 200
-
+    return jsonify(result)
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
@@ -913,6 +915,74 @@ def chat():
             'error': str(e),
             'status': 500
         }), 500
+
+@app.route('/api/add_review', methods=['POST'])
+def predict_sentiment():
+    try:
+        # Parsing JSON request data
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({"error": "Invalid input, 'text' field is required"}), 400
+        
+        review_text = data['text']
+        
+        # Predict sentiment
+        predicted_class, probabilities = analyzer_indobert.predict_sentiment(review_text)
+        
+        # Map predicted class to sentiment label
+        sentiment = "Positif" if predicted_class == 0 else "Netral" if predicted_class == 1 else "Negatif"
+        
+        # Save the review to database
+        new_review = Sentimen(komentar=review_text, hasil=sentiment)
+        db.session.add(new_review)
+        db.session.commit()
+        
+        # Return the response as JSON
+        return jsonify({
+            "status": "success",
+            "review": {
+                "komentar": new_review.komentar,
+                "hasil": new_review.hasil
+            }
+        }), 201
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({"error": str(e)}), 500
+
+
+
+##################### End API #####################
+
+##################### Password Reset ####################
+
+# Route untuk menampilkan form request reset password
+@app.route('/api/request-reset-password', methods=['POST'])
+def request_reset_password():
+    email = request.json.get('email')
+
+    if not email:
+        return jsonify({'error': 'Email harus diisi'}), 400
+
+    user = Pengguna.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'error': 'Email tidak ditemukan'}), 404
+
+    reset_token = jwt.encode({
+        'user_id': user.id,
+        'exp': datetime.utcnow() + timedelta(hours=1)
+    }, app.config['SECRET_KEY'], algorithm='HS256')
+
+    reset_link = url_for('reset_password', token=reset_token, _external=True)
+    msg = Message('Reset Password Request', recipients=[user.email])
+    msg.body = f'Klik link berikut untuk reset password: {reset_link}'
+
+    try:
+        mail.send(msg)
+    except Exception as e:
+        return jsonify({'error': f'Gagal mengirim email: {str(e)}'}), 500
+
+    return jsonify({'message': 'Email reset password telah dikirim'}), 200
+
 
 
 # Route untuk menampilkan dan memproses form reset password
