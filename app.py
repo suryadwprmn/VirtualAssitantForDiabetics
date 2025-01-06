@@ -3,7 +3,7 @@ from config import Config,db,mail
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah, HbA1c,Sentimen,Makanan
+from models import User, Article, RumahSakit, Pengguna, CatatanGulaDarah, HbA1c,Sentimen,Makanan,Konsumsi
 from functools import wraps
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -949,7 +949,108 @@ def predict_sentiment():
         # Handle unexpected errors
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/konsumsi', methods=['POST'])
+@token_required
+def create_konsumsi(current_user):
+    try:
+        # Get data from request JSON
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['jumlah_konsumsi', 'waktu']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'status': 'error',
+                    'message': f'Field {field} is required'
+                }), 400
 
+        # Validate waktu enum values
+        valid_waktu = ['pagi', 'siang', 'malam']
+        if data['waktu'] not in valid_waktu:
+            return jsonify({
+                'status': 'error',
+                'message': f'Invalid waktu value. Must be one of: {", ".join(valid_waktu)}'
+            }), 400
+
+        # Convert jumlah_konsumsi to float and validate
+        try:
+            jumlah_konsumsi = float(data['jumlah_konsumsi'])
+            if jumlah_konsumsi <= 0:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'jumlah_konsumsi must be greater than 0'
+                }), 400
+        except ValueError:
+            return jsonify({
+                'status': 'error',
+                'message': 'jumlah_konsumsi must be a valid number'
+            }), 400
+
+        # Create new Konsumsi instance
+        new_konsumsi = Konsumsi(
+            pengguna_id=current_user.id,
+            jumlah_konsumsi=jumlah_konsumsi,
+            waktu=data['waktu']
+        )
+
+        # Add to database and commit
+        db.session.add(new_konsumsi)
+        db.session.commit()
+
+        # Return success response
+        return jsonify({
+            'status': 'success',
+            'message': 'Konsumsi record created successfully',
+            'data': {
+                'id': new_konsumsi.id,
+                'pengguna_id': new_konsumsi.pengguna_id,
+                'jumlah_konsumsi': float(new_konsumsi.jumlah_konsumsi),
+                'waktu': new_konsumsi.waktu,
+                'created_at': new_konsumsi.created_at.isoformat()
+            }
+        }), 201
+
+    except Exception as e:
+        # Roll back the session in case of error
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': 'An error occurred while creating the record',
+            'error': str(e)
+        }), 500
+
+@app.route('/api/konsumsi/daily-total', methods=['GET'])
+@token_required
+def get_daily_consumption(current_user):
+    try:
+        # Get date parameter, default to today if not provided
+        date_str = request.args.get('date')
+        if date_str:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        else:
+            target_date = datetime.now().date()
+
+        # Query to get total consumption for the specified date
+        total_consumption = db.session.query(
+            func.coalesce(func.sum(Konsumsi.jumlah_konsumsi), 0).label('total')
+        ).filter(
+            Konsumsi.pengguna_id == current_user.id,
+            func.date(Konsumsi.created_at) == target_date
+        ).scalar()
+
+        # Convert to float and handle None case
+        total_consumption = float(total_consumption) if total_consumption else 0
+
+        return jsonify({
+            "total_harian": total_consumption
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 ##################### End API #####################
 

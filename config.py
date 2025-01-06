@@ -27,3 +27,4 @@ class Config:
     MAIL_USERNAME = 'suryadwipramana18@gmail.com'  
     MAIL_PASSWORD = 'zkzi kavg wyfi ddlr'     
     MAIL_DEFAULT_SENDER = 'your-email@gmail.com'
+

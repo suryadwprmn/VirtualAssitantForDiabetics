@@ -83,6 +83,9 @@ class Pengguna(db.Model):
     
     # Relationship to HbA1c (one to many)
     hba1c_records = db.relationship('HbA1c', back_populates='pengguna', lazy=True)
+    
+    # Relationship to Konsumsi (one to many)
+    konsumsi_makanan = db.relationship('Konsumsi', back_populates='pengguna', lazy=True)
 
     def __init__(self, name, email, password, gender, diabetes_category, phone=None):
         self.name = name
@@ -151,4 +154,21 @@ class Makanan(db.Model):
     def __init__(self, nama_makanan, gula):
         self.nama_makanan = nama_makanan
         self.gula = gula
+        
+class Konsumsi(db.Model):
+    __tablename__ = 'konsumsi_makanan'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    pengguna_id = db.Column(db.Integer, db.ForeignKey('pengguna.id'), nullable=False)
+    jumlah_konsumsi = db.Column(db.Numeric(10, 3), nullable=False)  
+    waktu = db.Column(db.Enum('pagi', 'siang', 'malam', name='waktu_enum'), nullable=False)  
+    created_at = db.Column(db.TIMESTAMP, server_default=db.func.now())
+
+    # Relasi dengan tabel Pengguna
+    pengguna = db.relationship('Pengguna', back_populates='konsumsi_makanan')
+
+    def __init__(self, pengguna_id, jumlah_konsumsi, waktu):
+        self.pengguna_id = pengguna_id
+        self.jumlah_konsumsi = jumlah_konsumsi
+        self.waktu = waktu
 
