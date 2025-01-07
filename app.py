@@ -289,7 +289,14 @@ def admin_dashboard():
     if session.get('role') != 'admin':
         flash('You do not have permission to access this page.', 'danger')
         return redirect(url_for('index'))
-    return render_template('admin/dashboard.html')
+    
+    # Get total counts
+    total_articles = Article.query.count()
+    total_hospitals = RumahSakit.query.count()
+    
+    return render_template('admin/dashboard.html', 
+                         total_articles=total_articles,
+                         total_hospitals=total_hospitals)
 
 
 @app.route('/admin/hasil_sentimen')
