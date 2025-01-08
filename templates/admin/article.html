@@ -2,54 +2,66 @@
 
 {% block main_content %}
 <div class="container mt-5">
-    <h1 class="mb-4 text-center">Articles List</h1>
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-primary">Articles List</h1>
+        <p class="text-muted">Manage all your articles in one place.</p>
+    </div>
 
     {% include 'layout/alert.html' %}
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ url_for('create_article') }}" class="btn btn-primary">Create New Article</a>
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{{ url_for('create_article') }}" class="btn btn-primary btn-lg shadow-sm">
+            <i class="fas fa-plus me-2"></i>Create New Article
+        </a>
     </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>No</th>
-                <th>Title</th>
-                <th>Content</th>
-                <th>Image</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for article in articles %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ article.title }}</td>
-                <td>{{ article.content[:100] }}...</td>
-                <td>
-                    {% if article.images %}
-                    <img src="{{ url_for('static', filename='uploads/' + article.images) }}" 
-                         alt="Article Image" class="img-thumbnail" style="max-width: 100px;">
-                    {% else %}
-                    No Image
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ url_for('edit_article', article_id=article.id) }}" class="btn btn-warning btn-sm">Edit</a>
-
-                    <form method="POST" action="{{ url_for('delete_article', article_id=article.id) }}" 
-                          style="display:inline;" 
-                          onsubmit="return confirm('Are you sure you want to delete this article?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="text-center">No articles available.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered shadow-sm align-middle">
+            <thead class="table-dark text-uppercase text-center">
+                <tr>
+                    <th>No</th>
+                    <th>Title</th>
+                    <th>Content</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td class="fw-bold">{{ article.title }}</td>
+                    <td>{{ article.content[:100] }}...</td>
+                    <td class="text-center">
+                        {% if article.images %}
+                        <img src="{{ url_for('static', filename='uploads/' + article.images) }}" 
+                             alt="Article Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                        {% else %}
+                        <span class="text-muted">No Image</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ url_for('edit_article', article_id=article.id) }}" class="btn btn-warning btn-sm me-1">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <form method="POST" action="{{ url_for('delete_article', article_id=article.id) }}" 
+                              style="display:inline;" 
+                              onsubmit="return confirm('Are you sure you want to delete this article?');">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>No articles available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

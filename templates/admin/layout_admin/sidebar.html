@@ -1,38 +1,45 @@
 <nav id="sidebar" class="sidebar js-sidebar">
     <div class="sidebar-content js-simplebar">
         <a class="sidebar-brand" href="index.html">
-  <span class="align-middle">Dashboard Admin</span>
-</a>
+            <span class="align-middle">Dashboard Admin</span>
+        </a>
 
         <ul class="sidebar-nav">
             <li class="sidebar-header">
                 Pages
             </li>
 
-            <li class="sidebar-item ">
+            <!-- Dashboard Link -->
+            <li class="sidebar-item">
                 <a class="sidebar-link" href="index.html">
-      <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
-    </a>
+                    <i class="align-middle" data-feather="home"></i> 
+                    <span class="align-middle">Dashboard</span>
+                </a>
             </li>
 
+            <!-- Articles Link -->
             <li class="sidebar-item">
                 <a class="sidebar-link" href="{{ url_for('articles') }}">
-      <i class="align-middle" data-feather="user"></i> <span class="align-middle">Artikel</span>
-    </a>
+                    <i class="align-middle" data-feather="file-text"></i> 
+                    <span class="align-middle">Artikel</span>
+                </a>
             </li>
 
+            <!-- Rumah Sakit Link -->
             <li class="sidebar-item">
                 <a class="sidebar-link" href="/admin/rumah_sakit">
-      <i class="align-middle" data-feather="log-in"></i> <span class="align-middle">Rumah Sakit</span>
-    </a>
+                    <i class="align-middle" data-feather="hospital"></i> 
+                    <span class="align-middle">Rumah Sakit</span>
+                </a>
             </li>
 
+            <!-- Hasil Ulasan Link -->
             <li class="sidebar-item">
                 <a class="sidebar-link" href="/admin/hasil_sentimen">
-      <i class="align-middle" data-feather="log-in"></i> <span class="align-middle">Hasil Ulasan</span>
-    </a>
+                    <i class="align-middle" data-feather="bar-chart-2"></i> 
+                    <span class="align-middle">Hasil Ulasan</span>
+                </a>
             </li>
         </ul>
-
     </div>
 </nav>
