@@ -8,10 +8,10 @@ db = SQLAlchemy()
 mail = Mail()
 
 class Config:
-    DB_USERNAME = "root"
-    DB_PASSWORD = ""  
-    DB_HOST = "localhost"
-    DB_NAME = "virtual_assistant"
+    DB_USERNAME = "homelaun_virtual_assistant"
+    DB_PASSWORD = "virtual_assistant123_"  
+    DB_HOST = "homelaundry.my.id"
+    DB_NAME = "homelaun_virtual_assistant"
     SECRET_KEY = os.getenv('SECRET_KEY', 'rahasia_bang')
     SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
