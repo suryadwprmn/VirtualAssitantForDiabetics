@@ -54,6 +54,10 @@ def setup_model():
     if 'llm' not in app.config or 'retriever' not in app.config:
         initialize_rag_model()
 
+@app.route("/icon")
+def icon():
+    return render_template("icon.html")
+
 @app.route('/cc')
 def cc():
     return render_template('layout/chatbot.html')
