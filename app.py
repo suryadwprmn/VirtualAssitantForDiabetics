@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for,request,redirect,flash,abort,session,jsonify
+from flask import Flask, render_template, url_for,request,redirect,flash,abort,session,jsonify,send_file,Response
 from config import Config,db,mail
 from werkzeug.utils import secure_filename
 import os
@@ -11,6 +11,14 @@ import jwt
 from sqlalchemy.sql.expression import func
 from indobert import SentimentAnalyzer
 from flask_mail import Message
+from ultralytics import YOLO
+from PIL import Image
+import io
+import base64
+import logging
+import traceback
+import numpy as np
+
 # from flask_jwt_extended import JWTManager, create_access_token,jwt_required, get_jwt_identity
 
 ###### CHATBOT####### 
@@ -23,9 +31,78 @@ PDF_FILE_PATH = "data/datasetV7.pdf"
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = 'rahasia' 
+app.config['UPLOAD_FOLDER'] = 'uploads/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 db.init_app(app)
 mail.init_app(app)
 CORS(app)
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+# Load YOLO model
+try:
+    # Load YOLO model
+    model = YOLO('object_detection/best.pt')
+    logger.info("Model loaded successfully")
+except Exception as e:
+    logger.error(f"Error loading model: {str(e)}")
+    logger.error(traceback.format_exc())
+
+# Class names for object detection
+class_names = [
+    'apel', 'ayam goreng', 'ikan goreng', 'jeruk', 'mie',
+    'nasi goreng', 'nasi putih', 'pepaya', 'pisang',
+    'tahu goreng', 'telur goreng', 'tempe goreng'
+]
+
+def process_image(image_data):
+    try:
+        # Decode base64 image
+        logger.debug("Starting image processing")
+        image_bytes = base64.b64decode(image_data.split(',')[1])
+        image = Image.open(io.BytesIO(image_bytes))
+        
+        # Convert image to RGB if it's not
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Resize image if it's too large (optional)
+        max_size = 1024
+        if max(image.size) > max_size:
+            ratio = max_size / max(image.size)
+            new_size = tuple([int(x * ratio) for x in image.size])
+            image = image.resize(new_size, Image.Resampling.LANCZOS)
+        
+        logger.debug("Image preprocessed successfully")
+        
+        # Perform detection with YOLOv8
+        results = model(image)[0]  # Get first result
+        logger.debug("Detection completed")
+        
+        # Process results
+        detections = []
+        for box in results.boxes:
+            # Get box coordinates in xyxy format
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            # Get confidence
+            conf = box.conf[0].item()
+            # Get class
+            cls = int(box.cls[0].item())
+            
+            detections.append({
+                'class': class_names[cls],
+                'confidence': round(conf * 100, 2),
+                'bbox': [round(x, 2) for x in [x1, y1, x2, y2]]
+            })
+        
+        logger.debug(f"Processed {len(detections)} detections")
+        return detections
+        
+    except Exception as e:
+        logger.error(f"Error in process_image: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise
 
 #CHATBOT INTEGRATIONS
 def initialize_rag_model():
@@ -47,6 +124,9 @@ def initialize_rag_model():
     except Exception as e:
         print(f"Error initializing model: {e}")
         raise e
+
+
+
 
 @app.before_request
 def setup_model():
@@ -115,7 +195,38 @@ def sentimen_analisis():
     reviews = Sentimen.query.all()
     return render_template('/layout/sentimen.html', reviews=reviews)
 
+@app.route('/object')
+def object():
+    return render_template('object_detection.html')
 
+@app.route('/object/detect', methods=['POST'])
+def detect():
+    try:
+        if not request.is_json:
+            logger.error("Request is not JSON")
+            return jsonify({'success': False, 'error': 'Request must be JSON'}), 400
+        
+        image_data = request.json.get('image')
+        if not image_data:
+            logger.error("No image data provided")
+            return jsonify({'success': False, 'error': 'No image data provided'}), 400
+        
+        if not image_data.startswith('data:image'):
+            logger.error("Invalid image data format")
+            return jsonify({'success': False, 'error': 'Invalid image data format'}), 400
+        
+        detections = process_image(image_data)
+        return jsonify({'success': True, 'detections': detections})
+        
+    except Exception as e:
+        logger.error(f"Error in detect route: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'details': traceback.format_exc()
+        }), 500
+    
 @app.route('/add_review', methods=['POST'])
 def add_review():
     data = request.json
