@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .upload-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #imageInput {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .canvas-container {
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        #resultsTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #resultsTable th, #resultsTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #resultsTable th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #resultsTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Object Detection System</h1>
+        <div class="upload-section">
+            <input type="file" id="imageInput" accept="image/*">
+            <button class="upload-btn" onclick="document.getElementById('imageInput').click()">
+                Pilih Gambar
+            </button>
+        </div>
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+        <table id="resultsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Objek</th>
+                    <th>Confidence</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const canvas = new fabric.Canvas('canvas', {
+            width: 800,
+            height: 600
+        });
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Clear canvas
+                    canvas.clear();
+                    
+                    // Load image
+                    fabric.Image.fromURL(event.target.result, function(img) {
+                        // Scale image to fit canvas
+                        const scale = Math.min(
+                            canvas.width / img.width,
+                            canvas.height / img.height
+                        );
+                        img.scale(scale);
+                        
+                        // Center image
+                        canvas.add(img);
+                        canvas.centerObject(img);
+                        canvas.renderAll();
+                        
+                        // Send image for detection
+                        detectObjects(event.target.result);
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function detectObjects(imageData) {
+            fetch('/object/detect', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayDetections(data.detections);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error processing image');
+            });
+        }
+
+        function displayDetections(detections) {
+            // Display bounding boxes
+            detections.forEach(det => {
+                const rect = new fabric.Rect({
+                    left: det.bbox[0],
+                    top: det.bbox[1],
+                    width: det.bbox[2] - det.bbox[0],
+                    height: det.bbox[3] - det.bbox[1],
+                    stroke: 'red',
+                    strokeWidth: 2,
+                    fill: 'transparent',
+                    selectable: false
+                });
+                
+                const text = new fabric.Text(`${det.class} (${det.confidence}%)`, {
+                    left: det.bbox[0],
+                    top: det.bbox[1] - 20,
+                    fontSize: 16,
+                    fill: 'red'
+                });
+                
+                canvas.add(rect);
+                canvas.add(text);
+            });
+            
+            // Update results table
+            const tbody = document.querySelector('#resultsTable tbody');
+            tbody.innerHTML = '';
+            detections.forEach(det => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = det.class;
+                row.insertCell(1).textContent = det.confidence + '%';
+            });
+            
+            document.getElementById('resultsTable').style.display = 'table';
+            canvas.renderAll();
+        }
+    </script>
+</body>
+</html>
